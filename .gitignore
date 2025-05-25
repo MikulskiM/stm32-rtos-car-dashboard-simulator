@@ -1,29 +1,51 @@
-# PlatformIO
+# === PlatformIO ===
 .pio/
 .build/
 
-# VSCode settings (opcjonalnie)
+# === VSCode (opcjonalne) ===
 .vscode/
 
-# Firmware/Build artifacts
-**/*.elf
-**/*.bin
-**/*.hex
-**/*.a
-**/*.o
-**/*.d
-**/*.map
-**/.sconsign*
-**/project.checksum
+# === STM32CubeIDE build artifacts ===
+*.launch
+*.log
+*.tmp
+*.bak
+*.old
+*.i
+*.o
+*.d
+*.elf
+*.bin
+*.hex
+*.map
+*.list
+*.srec
+*.axf
+*.gcno
+*.gcda
+*.su
+*.crf
+*.dep
+*.obj
 
-# Python cache
+# === Build folders ===
+Debug/
+Release/
+
+# === STM32CubeMX temp folders ===
+MX_*/
+
+# === IDE metadata ===
+.settings/
+
+# === Python cache ===
 __pycache__/
 *.pyc
 
-# Temp files
-*.log
-*.tmp
+# === Swap/temp/editor files ===
 *.swp
 *.swo
-*.bak
-*.old
+
+# === Drivers build leftovers (safety only) ===
+Drivers/**/*.o
+Drivers/**/*.d
