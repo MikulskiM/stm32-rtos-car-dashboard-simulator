@@ -6,6 +6,7 @@
  */
 
 #include <cpp_app.h>
+#include "ui_manager.h"
 #include "st7735.h"
 #include "fonts.h"
 
@@ -17,6 +18,7 @@ extern "C" {
 }
 
 App app;
+UIManager uiManager;
 
 void CppApp() {
 	app.init();
@@ -29,21 +31,22 @@ void StartUiTask(void *argument)
   /* Infinite loop */
   for(;;)
   {
-	  ST7735_FillScreen(ST7735_BLACK);
-	  ST7735_WriteString(10, 10, "BLACK", Font_7x10, ST7735_WHITE, ST7735_BLACK);
-	  osDelay(1000);
-	  ST7735_FillScreen(ST7735_BLUE);
-	  ST7735_WriteString(10, 10, "BLUE", Font_7x10, ST7735_BLACK, ST7735_BLUE);
-	  osDelay(1000);
-	  ST7735_FillScreen(ST7735_RED);
-	  ST7735_WriteString(10, 10, "RED", Font_7x10, ST7735_BLACK, ST7735_RED);
-	  osDelay(1000);
-	  ST7735_FillScreen(ST7735_GREEN);
-	  ST7735_WriteString(10, 10, "GREEN", Font_7x10, ST7735_BLACK, ST7735_GREEN);
-	  osDelay(1000);
-	  ST7735_FillScreen(ST7735_YELLOW);
-	  ST7735_WriteString(10, 10, "YELLOW", Font_7x10, ST7735_BLACK, ST7735_YELLOW);
-	  osDelay(1000);
+//	  TODO: later this should display updating values of car data and other modes
+	  int32_t pos = __HAL_TIM_GET_COUNTER(&htim1);	// return only + values (0-10 for right, 32757-32767 for negative
+	  if (pos >1 && pos < 16350 ) {
+	      uiManager.rotateRight();
+	      __HAL_TIM_SET_COUNTER(&htim1, 0);
+	  } else if (pos > 16350) {
+	      uiManager.rotateLeft();
+	      __HAL_TIM_SET_COUNTER(&htim1, 0);
+	  }
+	  osDelay(10);	// very light polling
+
+	  /* not a classic polling with while(1)
+	   * it's a RTOS task that sleeps most of the time
+	   * and looks only once in a while
+	   */
+
   }
   /* USER CODE END 5 */
 }
@@ -59,6 +62,23 @@ void StartLoggerTask(void *argument)
   /* USER CODE END 5 */
 }
 
+// WRAPPER FUNCCTIONS FOR UI MANAGER TO USE THEM IN MAIN.C
+extern "C" void UI_EncoderRotatedLeft() {
+    uiManager.rotateLeft();
+}
+
+extern "C" void UI_EncoderRotatedRight() {
+    uiManager.rotateRight();
+}
+
+extern "C" void UI_EncoderButtonPressed() {
+    uiManager.pressButton();
+}
+
+extern "C" void UI_DisplayDebugString(const char* msg) {
+    uiManager.displayDebugString(msg);
+}
+
 void App::init() {
 	ST7735_Unselect();
 
@@ -68,6 +88,8 @@ void App::init() {
 
 	ST7735_FillScreen(ST7735_RED);
 	HAL_Delay(1000);
+
+	uiManager.render();
 
 	/* Init scheduler */
 	osKernelInitialize();
@@ -88,6 +110,8 @@ void App::init() {
 
 	uiTaskHandle = osThreadNew(StartUiTask, NULL, &uiTask_attributes);
 	loggerTaskHandle = osThreadNew(StartLoggerTask, NULL, &loggerTask_attributes);
+
+	HAL_TIM_Encoder_Start(&htim1, TIM_CHANNEL_ALL);	// start the timer as an encoder
 }
 
 void App::run() {

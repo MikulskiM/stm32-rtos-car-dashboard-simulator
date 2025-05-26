@@ -36,7 +36,7 @@ extern "C" {
 
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
-
+extern TIM_HandleTypeDef htim1;
 /* USER CODE END ET */
 
 /* Exported constants --------------------------------------------------------*/
@@ -63,6 +63,11 @@ void Error_Handler(void);
 #define DC_OLED_GPIO_Port GPIOA
 #define CS_OLED_Pin GPIO_PIN_4
 #define CS_OLED_GPIO_Port GPIOA
+#define BLUE_LED_OUT_Pin GPIO_PIN_15
+#define BLUE_LED_OUT_GPIO_Port GPIOD
+#define ENCODER_SW_EXTI_Pin GPIO_PIN_8
+#define ENCODER_SW_EXTI_GPIO_Port GPIOA
+#define ENCODER_SW_EXTI_EXTI_IRQn EXTI9_5_IRQn
 
 /* USER CODE BEGIN Private defines */
 
