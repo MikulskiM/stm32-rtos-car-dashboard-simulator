@@ -5,8 +5,8 @@
  *      Author: Marek
  */
 
-#ifndef INC_CPP_APP_H_
-#define INC_CPP_APP_H_
+#ifndef INC_CPP_APP_HPP_
+#define INC_CPP_APP_HPP_
 
 #ifdef __cplusplus
 extern "C" {
@@ -25,4 +25,4 @@ public:
 	void run();
 };
 
-#endif /* INC_CPP_APP_H_ */
+#endif /* INC_CPP_APP_HPP_ */

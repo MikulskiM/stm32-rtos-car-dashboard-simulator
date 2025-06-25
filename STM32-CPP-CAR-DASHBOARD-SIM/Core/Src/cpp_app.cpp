@@ -5,10 +5,12 @@
  *      Author: Marek
  */
 
-#include <cpp_app.h>
-#include "ui_manager.h"
+#include <cpp_app.hpp>
+#include <ui_manager.hpp>
 #include "st7735.h"
 #include "fonts.h"
+#include "lsm303dlhc_simple.h"
+#include <cstdio>
 
 #include "cmsis_os.h"
 
@@ -120,6 +122,20 @@ void App::init() {
 	HAL_Delay(1000);
 
 	uiManager.render();
+
+	for (uint8_t addr = 0; addr < 127; addr++) {
+	    if (HAL_I2C_IsDeviceReady(&hi2c1, addr << 1, 2, 10) == HAL_OK) {
+	        printf("Device found at 0x%02X\r\n", addr);
+	    }
+	}
+
+	/* Init LSM303DLHC */
+	LSM303_Init(&hi2c1);
+
+	const osMutexAttr_t i2cMutexAttr = {
+	    .name = "i2c1Mutex"
+	};
+	i2c1Mutex = osMutexNew(&i2cMutexAttr);
 
 	/* Init scheduler */
 	osKernelInitialize();

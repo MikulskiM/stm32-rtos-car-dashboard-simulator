@@ -5,9 +5,12 @@
  *      Author: Praca
  */
 
-#include "ui_manager.h"
+#include <ui_manager.hpp>
 #include "st7735.h"
 #include "fonts.h"
+#include <cstdio>
+#include "lsm303dlhc_simple.h"
+#include "main.h"
 
 UIManager::UIManager() {
 	// TODO Auto-generated constructor stub
@@ -56,6 +59,9 @@ void UIManager::render() {
         case SCREEN_LED_CONTROL:
             ST7735_WriteString(10, 10, "LED CTRL", Font_11x18, ST7735_WHITE, ST7735_BLACK);
             break;
+        default:
+        	ST7735_WriteString(10, 10, "wrong currentScreen", Font_11x18, ST7735_WHITE, ST7735_BLACK);
+			break;
     }
 }
 
@@ -78,7 +84,25 @@ void UIManager::displayDebugString(const char* msg) {
 }
 
 void UIManager::displayCarStatus() {
-	ST7735_WriteString(10, 30, "car status data", Font_7x10, ST7735_WHITE, ST7735_RED);
+	ST7735_FillScreen(ST7735_BLACK);
+	screen_cleared = true;
+	ST7735_WriteString(10, 10, "CAR STATUS", Font_7x10, ST7735_WHITE, ST7735_BLACK);
+
+	if (osMutexAcquire(i2c1Mutex, 100) == osOK) {
+		LSM303DLHC_accel_raw acc_data;
+		LSM303_ReadAccel(&hi2c1, &acc_data);
+		osMutexRelease(i2c1Mutex);
+
+		char buf[32];
+		sprintf(buf, "X: %d", acc_data.x);
+		ST7735_WriteString(5, 30, buf, Font_7x10, ST7735_WHITE, ST7735_BLACK);
+		sprintf(buf, "Y: %d", acc_data.y);
+		ST7735_WriteString(5, 40, buf, Font_7x10, ST7735_WHITE, ST7735_BLACK);
+		sprintf(buf, "Z: %d", acc_data.z);
+		ST7735_WriteString(5, 50, buf, Font_7x10, ST7735_WHITE, ST7735_BLACK);
+	} else {
+		ST7735_WriteString(5, 50, "I2C TIMEOUT", Font_7x10, ST7735_WHITE, ST7735_RED);
+	}
 }
 
 void UIManager::displayRadio() {
@@ -101,11 +125,11 @@ MenuScreen UIManager::getCurrentScreen() {
 	return currentScreen;
 }
 
-MenuScreen nextScreen() {
+MenuScreen UIManager::nextScreen() {
 	return (MenuScreen)((currentScreen + 1) % SCREEN_COUNT);
 }
 
-MenuScreen previousScreen() {
+MenuScreen UIManager::previousScreen() {
 	return (MenuScreen)((currentScreen + SCREEN_COUNT - 1) % SCREEN_COUNT);
 }
 
