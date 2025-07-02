@@ -23,8 +23,6 @@ typedef enum {
 
 class UIManager {
 public:
-	UIManager();
-	virtual ~UIManager();
 
 	void rotateLeft();
 	void rotateRight();
@@ -48,5 +46,7 @@ private:
 	MenuScreen currentScreen = SCREEN_CAR_STATUS;
 	UiInteractionMode mode = UI_MODE_MENU;
 };
+
+extern UIManager uiManager;
 
 #endif /* UI_MANAGER_H_ */

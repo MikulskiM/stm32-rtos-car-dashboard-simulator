@@ -12,20 +12,14 @@
 #include "lsm303dlhc_simple.h"
 #include <cstdio>
 
-#include "cmsis_os.h"
-
 extern "C" {
     #include "main.h"
     #include "stm32f4xx_hal.h"
 }
 
 App app;
-UIManager uiManager;
 
-void CppApp() {
-	app.init();
-	app.run();
-}
+osMutexId_t i2c1Mutex;	// mutex for I2C1
 
 void StartUiTask(void *argument)
 {
@@ -94,23 +88,6 @@ void StartLoggerTask(void *argument)
   /* USER CODE END 5 */
 }
 
-// WRAPPER FUNCCTIONS FOR UI MANAGER TO USE THEM IN MAIN.C
-extern "C" void UI_EncoderRotatedLeft() {
-    uiManager.rotateLeft();
-}
-
-extern "C" void UI_EncoderRotatedRight() {
-    uiManager.rotateRight();
-}
-
-extern "C" void UI_EncoderButtonPressed() {
-    uiManager.pressButton();
-}
-
-extern "C" void UI_DisplayDebugString(const char* msg) {
-    uiManager.displayDebugString(msg);
-}
-
 void App::init() {
 	ST7735_Unselect();
 
@@ -167,13 +144,3 @@ void App::run() {
 	// the code won't go further. Now the control belongs to Scheduler
 
 }
-
-App::App() {
-	// TODO Auto-generated constructor stub
-
-}
-
-App::~App() {
-	// TODO Auto-generated destructor stub
-}
-

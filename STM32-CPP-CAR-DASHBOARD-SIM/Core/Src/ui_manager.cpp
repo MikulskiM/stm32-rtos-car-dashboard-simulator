@@ -9,17 +9,12 @@
 #include "st7735.h"
 #include "fonts.h"
 #include <cstdio>
+
+#include "cpp_app.hpp"			// I2C mutex
 #include "lsm303dlhc_simple.h"
 #include "main.h"
 
-UIManager::UIManager() {
-	// TODO Auto-generated constructor stub
-
-}
-
-UIManager::~UIManager() {
-	// TODO Auto-generated destructor stub
-}
+UIManager uiManager;
 
 void UIManager::rotateRight() {
 	if (mode == UI_MODE_MENU) {
@@ -85,7 +80,6 @@ void UIManager::displayDebugString(const char* msg) {
 
 void UIManager::displayCarStatus() {
 	ST7735_FillScreen(ST7735_BLACK);
-	screen_cleared = true;
 	ST7735_WriteString(10, 10, "CAR STATUS", Font_7x10, ST7735_WHITE, ST7735_BLACK);
 
 	if (osMutexAcquire(i2c1Mutex, 100) == osOK) {
