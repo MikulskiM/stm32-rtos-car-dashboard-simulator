@@ -123,8 +123,8 @@ int main(void)
   MX_TIM1_Init();
   MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
-  App::init();
-  App::run();
+  cpp_app.init();
+  cpp_app.run();
   /* USER CODE END 2 */
 
   /* Init scheduler */
