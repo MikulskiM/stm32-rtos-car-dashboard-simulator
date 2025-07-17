@@ -11,7 +11,10 @@ extern "C" {
 #endif
 
 void StartUiTask(void *argument);
-void StartLoggerTask(void *argument);
+void StartEncoderTask(void* argument);
+void StartUiManagerTask(void* argument);
+void StartDisplayTask(void* argument);
+void StartLoggerTask(void* argument);
 
 #ifdef __cplusplus
 }

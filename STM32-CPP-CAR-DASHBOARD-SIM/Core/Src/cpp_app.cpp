@@ -69,11 +69,18 @@ void App::initTasks() {
 	/* Init scheduler */
 	osKernelInitialize();
 
-	osThreadId_t uiTaskHandle;
-	osThreadId_t loggerTaskHandle;
-
-	const osThreadAttr_t uiTask_attributes = {
-	  .name = "uiTask",
+	const osThreadAttr_t encoderTask_attributes = {
+	  .name = "encoderTask",
+	  .stack_size = 128 * 4,
+	  .priority = (osPriority_t) osPriorityNormal,
+	};
+	const osThreadAttr_t uiManagerTask_attributes = {
+	  .name = "uiManagerTask",
+	  .stack_size = 128 * 4,
+	  .priority = (osPriority_t) osPriorityNormal,
+	};
+	const osThreadAttr_t displayTask_attributes = {
+	  .name = "displayTask",
 	  .stack_size = 128 * 4,
 	  .priority = (osPriority_t) osPriorityNormal,
 	};
@@ -83,8 +90,10 @@ void App::initTasks() {
 	  .priority = (osPriority_t) osPriorityNormal,
 	};
 
-	uiTaskHandle = osThreadNew(StartUiTask, NULL, &uiTask_attributes);
-	loggerTaskHandle = osThreadNew(StartLoggerTask, NULL, &loggerTask_attributes);
+	osThreadNew(StartEncoderTask, NULL, &encoderTask_attributes);
+	osThreadNew(StartUiManagerTask, NULL, &uiManagerTask_attributes);
+	osThreadNew(StartDisplayTask, NULL, &displayTask_attributes);
+	osThreadNew(StartLoggerTask, NULL, &loggerTask_attributes);
 }
 
 void App::initEncoder() {

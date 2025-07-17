@@ -19,7 +19,7 @@
 /* Includes ------------------------------------------------------------------*/
 
 #include "cpp_app.hpp"		// App::init(), App::run()
-#include "ui_manager.hpp"	// uiManager.pressButton()
+#include "queues.hpp"		// EncoderCommand
 
 #ifdef __cplusplus
 extern "C" {
@@ -83,7 +83,10 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 	HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_15);
 
     if (GPIO_Pin == GPIO_PIN_8 || GPIO_Pin == 256) {  // SW
-    	uiManager.pressButton();
+    	EncoderCommand cmd = {};
+    	cmd.type = ENCODER_CLICK;
+		BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+		osMessageQueuePut(encoderQueue, &cmd, 0, 0);
     }
 }
 
