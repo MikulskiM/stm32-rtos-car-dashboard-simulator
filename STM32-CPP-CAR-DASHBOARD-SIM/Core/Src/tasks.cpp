@@ -12,7 +12,7 @@ void StartUiTask(void *argument)
     for(;;)
     {
         int32_t pos = __HAL_TIM_GET_COUNTER(&htim1); // return only + values (1-11 for right, 32757-32767 for negative
-        if (pos > 1 && pos < 16350) {
+        if (pos > ENCODER_POS_THRESHOLD_RIGHT_MIN && pos <= ENCODER_POS_THRESHOLD_RIGHT_MAX) {
             if (uiManager.isInActiveMode()) {
                 uiManager.exitActiveMode();
                 uiManager.render();
@@ -20,7 +20,7 @@ void StartUiTask(void *argument)
                 uiManager.rotateRight();
             }
             __HAL_TIM_SET_COUNTER(&htim1, 0);
-        } else if (pos > 16350) {
+        } else if (pos >= ENCODER_POS_THRESHOLD_LEFT_MIN) {
             if (uiManager.isInActiveMode()) {
                 uiManager.exitActiveMode();
                 uiManager.render();

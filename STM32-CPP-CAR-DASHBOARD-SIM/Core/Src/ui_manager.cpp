@@ -14,6 +14,13 @@
 #include "lsm303dlhc_simple.h"
 #include "main.h"
 
+#define UI_TEXT_X			10
+#define UI_TEXT_X_SMALL		5
+#define UI_TEXT_Y_HEADER	10
+#define UI_TEXT_Y_LINE1		30
+#define UI_TEXT_Y_LINE2		40
+#define UI_TEXT_Y_LINE3		50
+
 UIManager uiManager;
 
 void UIManager::rotateRight() {
@@ -43,19 +50,19 @@ void UIManager::render() {
     ST7735_FillScreen(ST7735_BLACK);
     switch (currentScreen) {
         case SCREEN_CAR_STATUS:
-            ST7735_WriteString(10, 10, "CAR STATUS", Font_11x18, ST7735_WHITE, ST7735_BLACK);
+            ST7735_WriteString(UI_TEXT_X, UI_TEXT_Y_HEADER, "CAR STATUS", Font_11x18, ST7735_WHITE, ST7735_BLACK);
             break;
         case SCREEN_RADIO:
-            ST7735_WriteString(10, 10, "RADIO", Font_11x18, ST7735_WHITE, ST7735_BLACK);
+            ST7735_WriteString(UI_TEXT_X, UI_TEXT_Y_HEADER, "RADIO", Font_11x18, ST7735_WHITE, ST7735_BLACK);
             break;
         case SCREEN_SETTINGS:
-            ST7735_WriteString(10, 10, "SETTINGS", Font_11x18, ST7735_WHITE, ST7735_BLACK);
+            ST7735_WriteString(UI_TEXT_X, UI_TEXT_Y_HEADER, "SETTINGS", Font_11x18, ST7735_WHITE, ST7735_BLACK);
             break;
         case SCREEN_LED_CONTROL:
-            ST7735_WriteString(10, 10, "LED CTRL", Font_11x18, ST7735_WHITE, ST7735_BLACK);
+            ST7735_WriteString(UI_TEXT_X, UI_TEXT_Y_HEADER, "LED CTRL", Font_11x18, ST7735_WHITE, ST7735_BLACK);
             break;
         default:
-        	ST7735_WriteString(10, 10, "wrong currentScreen", Font_11x18, ST7735_WHITE, ST7735_BLACK);
+        	ST7735_WriteString(UI_TEXT_X, UI_TEXT_Y_HEADER, "wrong currentScreen", Font_11x18, ST7735_WHITE, ST7735_BLACK);
 			break;
     }
 }
@@ -75,12 +82,12 @@ void UIManager::pressButton() {
 }
 
 void UIManager::displayDebugString(const char* msg) {
-	ST7735_WriteString(10, 10, msg, Font_11x18, ST7735_WHITE, ST7735_RED);
+	ST7735_WriteString(UI_TEXT_X, UI_TEXT_Y_HEADER, msg, Font_11x18, ST7735_WHITE, ST7735_RED);
 }
 
 void UIManager::displayCarStatus() {
 	ST7735_FillScreen(ST7735_BLACK);
-	ST7735_WriteString(10, 10, "CAR STATUS", Font_7x10, ST7735_WHITE, ST7735_BLACK);
+	ST7735_WriteString(UI_TEXT_X, UI_TEXT_Y_HEADER, "CAR STATUS", Font_7x10, ST7735_WHITE, ST7735_BLACK);
 
 	if (osMutexAcquire(i2c1Mutex, 100) == osOK) {
 		LSM303DLHC_accel_raw acc_data;
@@ -89,26 +96,26 @@ void UIManager::displayCarStatus() {
 
 		char buf[32];
 		sprintf(buf, "X: %d", acc_data.x);
-		ST7735_WriteString(5, 30, buf, Font_7x10, ST7735_WHITE, ST7735_BLACK);
+		ST7735_WriteString(UI_TEXT_X_SMALL, UI_TEXT_Y_LINE1, buf, Font_7x10, ST7735_WHITE, ST7735_BLACK);
 		sprintf(buf, "Y: %d", acc_data.y);
-		ST7735_WriteString(5, 40, buf, Font_7x10, ST7735_WHITE, ST7735_BLACK);
+		ST7735_WriteString(UI_TEXT_X_SMALL, UI_TEXT_Y_LINE2, buf, Font_7x10, ST7735_WHITE, ST7735_BLACK);
 		sprintf(buf, "Z: %d", acc_data.z);
-		ST7735_WriteString(5, 50, buf, Font_7x10, ST7735_WHITE, ST7735_BLACK);
+		ST7735_WriteString(UI_TEXT_X_SMALL, UI_TEXT_Y_LINE3, buf, Font_7x10, ST7735_WHITE, ST7735_BLACK);
 	} else {
-		ST7735_WriteString(5, 50, "I2C TIMEOUT", Font_7x10, ST7735_WHITE, ST7735_RED);
+		ST7735_WriteString(UI_TEXT_X_SMALL, UI_TEXT_Y_LINE3, "I2C TIMEOUT", Font_7x10, ST7735_WHITE, ST7735_RED);
 	}
 }
 
 void UIManager::displayRadio() {
-	ST7735_WriteString(10, 30, "radio status", Font_7x10, ST7735_WHITE, ST7735_RED);
+	ST7735_WriteString(UI_TEXT_X, UI_TEXT_Y_LINE1, "radio status", Font_7x10, ST7735_WHITE, ST7735_RED);
 }
 
 void UIManager::displaySettings() {
-	ST7735_WriteString(10, 30, "change settings", Font_7x10, ST7735_WHITE, ST7735_RED);
+	ST7735_WriteString(UI_TEXT_X, UI_TEXT_Y_LINE1, "change settings", Font_7x10, ST7735_WHITE, ST7735_RED);
 }
 
 void UIManager::displayLedControl() {
-	ST7735_WriteString(10, 30, "LED control panel", Font_7x10, ST7735_WHITE, ST7735_RED);
+	ST7735_WriteString(UI_TEXT_X, UI_TEXT_Y_LINE1, "LED control panel", Font_7x10, ST7735_WHITE, ST7735_RED);
 }
 
 bool UIManager::isInActiveMode() {
