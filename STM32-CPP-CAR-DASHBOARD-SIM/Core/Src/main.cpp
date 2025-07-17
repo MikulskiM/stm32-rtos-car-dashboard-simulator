@@ -17,21 +17,19 @@
   */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
-#include "main.h"
+
+#include "cpp_app.hpp"		// App::init(), App::run()
+#include "ui_manager.hpp"	// uiManager.pressButton()
+
+#ifdef __cplusplus
+extern "C" {
+	#include "main.h"
+}
+#endif
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#ifdef __cplusplus
-extern "C" {
-#endif
-void CppApp(void);  // this function starts application in C++
-void UI_EncoderRotatedLeft(void);
-void UI_EncoderRotatedRight(void);
-void UI_EncoderButtonPressed(void);
-void UI_DisplayDebugString(const char* msg);
-#ifdef __cplusplus
-}
-#endif
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -56,15 +54,7 @@ SPI_HandleTypeDef hspi1;
 
 TIM_HandleTypeDef htim1;
 
-/* Definitions for defaultTask */
-osThreadId_t defaultTaskHandle;
-const osThreadAttr_t defaultTask_attributes = {
-  .name = "defaultTask",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
-};
 /* USER CODE BEGIN PV */
-osMutexId_t i2c1Mutex;	// mutex for I2C1
 
 /* USER CODE END PV */
 
@@ -93,7 +83,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 	HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_15);
 
     if (GPIO_Pin == GPIO_PIN_8 || GPIO_Pin == 256) {  // SW
-		UI_EncoderButtonPressed();
+    	uiManager.pressButton();
     }
 }
 
@@ -133,7 +123,8 @@ int main(void)
   MX_TIM1_Init();
   MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
-  CppApp();
+  cpp_app.init();
+  cpp_app.run();
   /* USER CODE END 2 */
 
   /* Init scheduler */
@@ -156,8 +147,6 @@ int main(void)
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
-  /* creation of defaultTask */
-  defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -412,24 +401,6 @@ static void MX_GPIO_Init(void)
 /* USER CODE BEGIN 4 */
 
 /* USER CODE END 4 */
-
-/* USER CODE BEGIN Header_StartDefaultTask */
-/**
-  * @brief  Function implementing the defaultTask thread.
-  * @param  argument: Not used
-  * @retval None
-  */
-/* USER CODE END Header_StartDefaultTask */
-void StartDefaultTask(void *argument)
-{
-  /* USER CODE BEGIN 5 */
-  /* Infinite loop */
-  for(;;)
-  {
-    osDelay(1);
-  }
-  /* USER CODE END 5 */
-}
 
 /**
   * @brief  This function is executed in case of error occurrence.

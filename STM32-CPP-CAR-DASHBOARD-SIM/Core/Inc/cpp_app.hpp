@@ -8,21 +8,22 @@
 #ifndef INC_CPP_APP_HPP_
 #define INC_CPP_APP_HPP_
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-void CppApp(void);
-#ifdef __cplusplus
-}
-#endif
+#include "cmsis_os.h"
 
 class App {
 public:
-	App();
-	virtual ~App();
-
 	void init();
 	void run();
+
+private:
+	void initDisplay();
+	void initI2CSensors();
+	void initMutexes();
+	void initTasks();
+	void initEncoder();
 };
+
+extern App cpp_app;
+extern osMutexId_t i2c1Mutex;	// mutex for I2C1
 
 #endif /* INC_CPP_APP_HPP_ */
