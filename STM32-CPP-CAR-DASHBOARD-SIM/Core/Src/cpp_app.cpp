@@ -13,6 +13,7 @@
 #include "fonts.h"
 #include "lsm303dlhc_simple.h"
 #include "tasks.hpp"
+#include "queues.hpp"
 
 extern "C" {
     #include "main.h"
@@ -88,4 +89,10 @@ void App::initTasks() {
 
 void App::initEncoder() {
 	HAL_TIM_Encoder_Start(&htim1, TIM_CHANNEL_ALL);	// start the timer as an encoder
+}
+
+void initQueues() {
+	encoderQueue = osMessageQueueNew(EIGHT_MESSAGES, sizeof(EncoderCommand), NULL);
+	displayQueue = osMessageQueueNew(EIGHT_MESSAGES, sizeof(DisplayCommand), NULL);
+	loggerQueue = osMessageQueueNew(SIXTEEN_MESSAGES, sizeof(LogEvent), NULL);
 }

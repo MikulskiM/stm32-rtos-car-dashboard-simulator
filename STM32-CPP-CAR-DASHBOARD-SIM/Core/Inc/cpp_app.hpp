@@ -21,6 +21,7 @@ private:
 	void initMutexes();
 	void initTasks();
 	void initEncoder();
+	void initQueues();
 };
 
 extern App cpp_app;
