@@ -10,6 +10,8 @@
 
 #include "cmsis_os.h"
 
+#define STACK_SIZE 512*4
+
 class App {
 public:
 	void init();
@@ -18,13 +20,11 @@ public:
 private:
 	void initDisplay();
 	void initI2CSensors();
-	void initMutexes();
 	void initTasks();
-	void initEncoder();
 	void initQueues();
+	void initEncoder();
 };
 
 extern App cpp_app;
-extern osMutexId_t i2c1Mutex;	// mutex for I2C1
 
 #endif /* INC_CPP_APP_HPP_ */

@@ -9,42 +9,25 @@
 #define INC_QUEUES_HPP_
 
 #include "cmsis_os2.h"
-#include "ui_manager.hpp"	// MenuScreen enum
 
 #define EIGHT_MESSAGES		8
 #define SIXTEEN_MESSAGES	16
 
-//	--- ENCODER ---
-enum EncoderCommandType {
-	ENCODER_LEFT,
-	ENCODER_RIGHT,
-	ENCODER_CLICK
-};
-
-struct EncoderCommand {
-	EncoderCommandType type;
-};
-extern osMessageQueueId_t encoderQueue;
-
 //	--- DISPLAY ---
-enum DisplayCommandType {
-	DISPLAY_MENU,
-	DISPLAY_MODE_CAR,
-	DISPLAY_MODE_RADIO,
-	DISPLAYCLEAR
-};
-
-struct DisplayCommand {
-	DisplayCommandType	type;
-	MenuScreen			screen;
-};
 extern osMessageQueueId_t displayQueue;
 
-
 //	--- LOGGER ---
+typedef enum {
+    LOG_INFO,
+    LOG_WARN,
+    LOG_ERROR
+} LogLevel;
+
 struct LogEvent {
+	LogLevel level;
 	char msg[64];
 };
+
 extern osMessageQueueId_t loggerQueue;
 
 #endif /* INC_QUEUES_HPP_ */

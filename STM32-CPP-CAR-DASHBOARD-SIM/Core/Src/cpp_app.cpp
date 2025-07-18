@@ -8,7 +8,6 @@
 #include <cstdio>
 
 #include "cpp_app.hpp"
-#include "ui_manager.hpp"
 #include "st7735.h"
 #include "fonts.h"
 #include "lsm303dlhc_simple.h"
@@ -22,32 +21,33 @@ extern "C" {
 
 App cpp_app;
 
-osMutexId_t i2c1Mutex;	// mutex for I2C1
-
 void App::init() {
 	initDisplay();
 	initI2CSensors();
-	initMutexes();
 	initTasks();
+	initQueues();
 	initEncoder();
 }
 
 void App::run() {
+	printf("osKernelStart() takes control from now on\n");
 	/* Start scheduler */
 	osKernelStart();
 	// the code won't go further. Now the control belongs to Scheduler
 }
 
 void App::initDisplay() {
+	printf("initiating display...\n");
+
 	ST7735_Init();
 	ST7735_InvertColors(false);
 
 	HAL_Delay(1000);
-
-	uiManager.render();
 }
 
 void App::initI2CSensors() {
+	printf("initiating I2C sensors...\n");
+
 	LSM303_Init(&hi2c1);
 
 	// scan I2C addresses - debug purposes
@@ -58,41 +58,56 @@ void App::initI2CSensors() {
 	}
 }
 
-void App::initMutexes() {
-	const osMutexAttr_t i2cMutexAttr = {
-		.name = "i2c1Mutex"
-	};
-	i2c1Mutex = osMutexNew(&i2cMutexAttr);
-}
-
 void App::initTasks() {
+	printf("initiating tasks...\n");
+
 	/* Init scheduler */
 	osKernelInitialize();
 
-	osThreadId_t uiTaskHandle;
-	osThreadId_t loggerTaskHandle;
-
-	const osThreadAttr_t uiTask_attributes = {
-	  .name = "uiTask",
-	  .stack_size = 128 * 4,
+	const osThreadAttr_t displayTask_attributes = {
+	  .name = "displayTask",
+	  .stack_size = STACK_SIZE,
+	  .priority = (osPriority_t) osPriorityNormal,
+	};
+	const osThreadAttr_t managerTask_attributes = {
+	  .name = "managerTask",
+	  .stack_size = STACK_SIZE,
 	  .priority = (osPriority_t) osPriorityNormal,
 	};
 	const osThreadAttr_t loggerTask_attributes = {
 	  .name = "loggerTask",
-	  .stack_size = 128 * 4,
+	  .stack_size = STACK_SIZE,
 	  .priority = (osPriority_t) osPriorityNormal,
 	};
 
-	uiTaskHandle = osThreadNew(StartUiTask, NULL, &uiTask_attributes);
-	loggerTaskHandle = osThreadNew(StartLoggerTask, NULL, &loggerTask_attributes);
+	osThreadNew(StartDisplayTask, NULL, &displayTask_attributes);
+	osThreadNew(StartManagerTask, NULL, &managerTask_attributes);
+	osThreadNew(StartLoggerTask, NULL, &loggerTask_attributes);
 }
 
 void App::initEncoder() {
+	printf("initiating encoder...\n");
+
 	HAL_TIM_Encoder_Start(&htim1, TIM_CHANNEL_ALL);	// start the timer as an encoder
 }
 
-void initQueues() {
-	encoderQueue = osMessageQueueNew(EIGHT_MESSAGES, sizeof(EncoderCommand), NULL);
-	displayQueue = osMessageQueueNew(EIGHT_MESSAGES, sizeof(DisplayCommand), NULL);
-	loggerQueue = osMessageQueueNew(SIXTEEN_MESSAGES, sizeof(LogEvent), NULL);
+void App::initQueues() {
+	printf("initiating queues...\n");
+
+	const osMessageQueueAttr_t loggerQueue_attributes = {
+		.name = "loggerQueue"
+	};
+	const osMessageQueueAttr_t displayQueue_attributes = {
+		.name = "displayQueue"
+	};
+
+	displayQueue = osMessageQueueNew(SIXTEEN_MESSAGES, sizeof(uint32_t), &displayQueue_attributes);
+	loggerQueue = osMessageQueueNew(SIXTEEN_MESSAGES, sizeof(LogEvent), &loggerQueue_attributes);
+
+	if (loggerQueue == NULL) {
+		printf("ERROR: loggerQueue not initialized!\r\n");
+	}
+	if (displayQueue == NULL) {
+		printf("ERROR: displayQueue not initialized!\r\n");
+	}
 }

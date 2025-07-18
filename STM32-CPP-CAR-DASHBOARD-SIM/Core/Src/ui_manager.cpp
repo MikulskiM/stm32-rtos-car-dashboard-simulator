@@ -89,21 +89,21 @@ void UIManager::displayCarStatus() {
 	ST7735_FillScreen(ST7735_BLACK);
 	ST7735_WriteString(UI_TEXT_X, UI_TEXT_Y_HEADER, "CAR STATUS", Font_7x10, ST7735_WHITE, ST7735_BLACK);
 
-	if (osMutexAcquire(i2c1Mutex, 100) == osOK) {
-		LSM303DLHC_accel_raw acc_data;
-		LSM303_ReadAccel(&hi2c1, &acc_data);
-		osMutexRelease(i2c1Mutex);
-
-		char buf[32];
-		sprintf(buf, "X: %d", acc_data.x);
-		ST7735_WriteString(UI_TEXT_X_SMALL, UI_TEXT_Y_LINE1, buf, Font_7x10, ST7735_WHITE, ST7735_BLACK);
-		sprintf(buf, "Y: %d", acc_data.y);
-		ST7735_WriteString(UI_TEXT_X_SMALL, UI_TEXT_Y_LINE2, buf, Font_7x10, ST7735_WHITE, ST7735_BLACK);
-		sprintf(buf, "Z: %d", acc_data.z);
-		ST7735_WriteString(UI_TEXT_X_SMALL, UI_TEXT_Y_LINE3, buf, Font_7x10, ST7735_WHITE, ST7735_BLACK);
-	} else {
-		ST7735_WriteString(UI_TEXT_X_SMALL, UI_TEXT_Y_LINE3, "I2C TIMEOUT", Font_7x10, ST7735_WHITE, ST7735_RED);
-	}
+//	if (osMutexAcquire(i2c1Mutex, 100) == osOK) {
+//		LSM303DLHC_accel_raw acc_data;
+//		LSM303_ReadAccel(&hi2c1, &acc_data);
+//		osMutexRelease(i2c1Mutex);
+//
+//		char buf[32];
+//		sprintf(buf, "X: %d", acc_data.x);
+//		ST7735_WriteString(UI_TEXT_X_SMALL, UI_TEXT_Y_LINE1, buf, Font_7x10, ST7735_WHITE, ST7735_BLACK);
+//		sprintf(buf, "Y: %d", acc_data.y);
+//		ST7735_WriteString(UI_TEXT_X_SMALL, UI_TEXT_Y_LINE2, buf, Font_7x10, ST7735_WHITE, ST7735_BLACK);
+//		sprintf(buf, "Z: %d", acc_data.z);
+//		ST7735_WriteString(UI_TEXT_X_SMALL, UI_TEXT_Y_LINE3, buf, Font_7x10, ST7735_WHITE, ST7735_BLACK);
+//	} else {
+//		ST7735_WriteString(UI_TEXT_X_SMALL, UI_TEXT_Y_LINE3, "I2C TIMEOUT", Font_7x10, ST7735_WHITE, ST7735_RED);
+//	}
 }
 
 void UIManager::displayRadio() {
