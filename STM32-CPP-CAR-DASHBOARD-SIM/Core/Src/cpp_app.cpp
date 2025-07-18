@@ -79,10 +79,16 @@ void App::initTasks() {
 	  .stack_size = STACK_SIZE,
 	  .priority = (osPriority_t) osPriorityNormal,
 	};
+	const osThreadAttr_t encoderTask_attributes = {
+	  .name = "encoderTask",
+	  .stack_size = STACK_SIZE,
+	  .priority = (osPriority_t) osPriorityNormal,
+	};
 
 	osThreadNew(StartDisplayTask, NULL, &displayTask_attributes);
 	osThreadNew(StartManagerTask, NULL, &managerTask_attributes);
 	osThreadNew(StartLoggerTask, NULL, &loggerTask_attributes);
+	osThreadNew(StartEncoderTask, NULL, &encoderTask_attributes);
 }
 
 void App::initEncoder() {
@@ -100,14 +106,21 @@ void App::initQueues() {
 	const osMessageQueueAttr_t displayQueue_attributes = {
 		.name = "displayQueue"
 	};
+	const osMessageQueueAttr_t encoderQueue_attributes = {
+		.name = "encoderQueue"
+	};
 
 	displayQueue = osMessageQueueNew(SIXTEEN_MESSAGES, sizeof(uint32_t), &displayQueue_attributes);
 	loggerQueue = osMessageQueueNew(SIXTEEN_MESSAGES, sizeof(LogEvent), &loggerQueue_attributes);
+	encoderQueue = osMessageQueueNew(EIGHT_MESSAGES, sizeof(EncoderCommand), &loggerQueue_attributes);
 
 	if (loggerQueue == NULL) {
 		printf("ERROR: loggerQueue not initialized!\r\n");
 	}
 	if (displayQueue == NULL) {
 		printf("ERROR: displayQueue not initialized!\r\n");
+	}
+	if (encoderQueue == NULL) {
+		printf("ERROR: encoderQueue not initialized!\r\n");
 	}
 }

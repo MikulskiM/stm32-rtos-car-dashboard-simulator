@@ -13,6 +13,15 @@
 #define EIGHT_MESSAGES		8
 #define SIXTEEN_MESSAGES	16
 
+//	--- ENCODER ---
+typedef enum {
+	ENCODER_LEFT,
+	ENCODER_RIGHT,
+	ENCODER_CLICK
+} EncoderCommand;
+
+extern osMessageQueueId_t encoderQueue;
+
 //	--- DISPLAY ---
 extern osMessageQueueId_t displayQueue;
 

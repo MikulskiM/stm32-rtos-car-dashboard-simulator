@@ -9,3 +9,4 @@
 
 osMessageQueueId_t displayQueue = nullptr;
 osMessageQueueId_t loggerQueue	= nullptr;
+osMessageQueueId_t encoderQueue	= nullptr;
