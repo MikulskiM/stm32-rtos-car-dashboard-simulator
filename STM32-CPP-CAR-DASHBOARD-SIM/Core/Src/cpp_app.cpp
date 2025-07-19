@@ -56,6 +56,10 @@ void App::initI2CSensors() {
 			printf("Device found at 0x%02X\r\n", addr);
 		}
 	}
+
+	LSM303DLHC_accel_raw test;
+	LSM303_ReadAccel(&hi2c1, &test);
+	printf("Accel INIT TEST: X=%d Y=%d Z=%d\r\n", test.x, test.y, test.z);
 }
 
 void App::initTasks() {
@@ -84,11 +88,17 @@ void App::initTasks() {
 	  .stack_size = GENERAL_STACK_SIZE,
 	  .priority = (osPriority_t) osPriorityNormal,
 	};
+	const osThreadAttr_t accelTask_attributes = {
+	  .name = "acceleratorTask",
+	  .stack_size = GENERAL_STACK_SIZE,
+	  .priority = (osPriority_t) osPriorityNormal,
+	};
 
 	osThreadNew(StartDisplayTask, NULL, &displayTask_attributes);
 	osThreadNew(StartManagerTask, NULL, &managerTask_attributes);
 	osThreadNew(StartLoggerTask, NULL, &loggerTask_attributes);
 	osThreadNew(StartEncoderTask, NULL, &encoderTask_attributes);
+	osThreadNew(StartAccelTask, NULL, &accelTask_attributes);
 }
 
 void App::initEncoder() {
@@ -109,10 +119,14 @@ void App::initQueues() {
 	const osMessageQueueAttr_t encoderQueue_attributes = {
 		.name = "encoderQueue"
 	};
+	const osMessageQueueAttr_t accelQueue_attributes = {
+		.name = "accelQueue"
+	};
 
 	displayQueue = osMessageQueueNew(SIXTEEN_MESSAGES, sizeof(uint32_t), &displayQueue_attributes);
 	loggerQueue = osMessageQueueNew(SIXTEEN_MESSAGES, sizeof(LogEvent), &loggerQueue_attributes);
 	encoderQueue = osMessageQueueNew(EIGHT_MESSAGES, sizeof(EncoderCommand), &loggerQueue_attributes);
+	accelQueue = osMessageQueueNew(EIGHT_MESSAGES, sizeof(LSM303DLHC_accel_raw), &accelQueue_attributes);
 
 	if (loggerQueue == NULL) {
 		printf("ERROR: loggerQueue not initialized!\r\n");
@@ -122,5 +136,8 @@ void App::initQueues() {
 	}
 	if (encoderQueue == NULL) {
 		printf("ERROR: encoderQueue not initialized!\r\n");
+	}
+	if (accelQueue == NULL) {
+		printf("ERROR: accelQueue not initialized!\r\n");
 	}
 }

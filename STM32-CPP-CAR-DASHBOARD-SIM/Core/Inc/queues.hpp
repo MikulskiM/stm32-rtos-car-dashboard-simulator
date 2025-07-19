@@ -19,7 +19,6 @@
 #define MSG_PRIORITY_0		0
 
 #define LOGGER_MSG_LEN		128
-#define ENCODER_MSG_LEN		64
 #define DISPLAY_BUF_LEN		16
 
 #define SAFE_QUEUE_PUT(queue, value, queueName, priority, timeout, format)                \
@@ -58,5 +57,8 @@ struct LogEvent {
 };
 
 extern osMessageQueueId_t loggerQueue;
+
+//	--- ACCELERATOR ---
+extern osMessageQueueId_t accelQueue;
 
 #endif /* INC_QUEUES_HPP_ */

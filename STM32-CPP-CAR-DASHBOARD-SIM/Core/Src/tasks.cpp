@@ -8,6 +8,7 @@ extern "C" {
 #include "main.h"
 #include "cmsis_os.h"
 #include "stm32f4xx_hal.h"
+#include "lsm303dlhc_simple.h"
 }
 
 inline void displayLog(const char* msg) {
@@ -106,11 +107,12 @@ void StartManagerTask(void *argument) {
 	printf("Manager task started\r\n");
 	EncoderCommand cmd;
     uint32_t counter = 0;
-    char msg[ENCODER_MSG_LEN];
+    char msg[LOGGER_MSG_LEN];
+    LSM303DLHC_accel_raw accel;
 
     for (;;) {
 
-    	if (osMessageQueueGet(encoderQueue, &cmd, nullptr, osWaitForever) == osOK) {
+    	if (osMessageQueueGet(encoderQueue, &cmd, nullptr, 0) == osOK) {
 
     		if (cmd == ENCODER_RIGHT) {
     			counter++;
@@ -127,6 +129,43 @@ void StartManagerTask(void *argument) {
     		SAFE_QUEUE_PUT(displayQueue, counter, "displayQueue", MSG_PRIORITY_0, TIMEOUT_100, "%s");
 		}
 
+    	if (osMessageQueueGet(accelQueue, &accel, nullptr, 0) == osOK) {
+    		snprintf(msg, sizeof(msg), "Accel: X=%d Y=%d Z=%d", accel.x, accel.y, accel.z);
+    		sendLog(LOG_INFO, msg);
+
+    		// TODO: DISPLAY ACCEL DATA
+    	}
+
 		osDelay(10);
     }
 }
+
+
+void StartAccelTask(void *argument) {
+	printf("Accelerator task started\r\n");
+
+	LSM303DLHC_accel_raw latestSample = {0};
+	uint32_t tick = 0;
+
+	for (;;) {
+		LSM303_ReadAccel(&hi2c1, &latestSample);
+
+		int32_t x = latestSample.x;
+		int32_t y = latestSample.y;
+		int32_t z = latestSample.z;
+
+		// every 500 ms send snapshot to the manager
+		tick += TIME_100_MS;
+		if (tick >= TIME_500_MS) {
+			tick = 0;
+
+			osStatus_t status = osMessageQueuePut(accelQueue, &latestSample, 0, 100);
+			if (status != osOK) {
+				printf("accelQueue FULL or error! status = %d\r\n", status);
+			}
+		}
+
+		osDelay(TIME_100_MS);
+	}
+}
+

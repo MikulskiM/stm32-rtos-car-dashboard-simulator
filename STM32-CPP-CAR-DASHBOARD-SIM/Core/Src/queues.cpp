@@ -11,6 +11,7 @@
 osMessageQueueId_t displayQueue = nullptr;
 osMessageQueueId_t loggerQueue	= nullptr;
 osMessageQueueId_t encoderQueue	= nullptr;
+osMessageQueueId_t accelQueue	= nullptr;
 
 void checkQueueAndMsgSizeMatch(const char* name, osMessageQueueId_t queue, size_t expectedSize) {
 	uint32_t actualSize = osMessageQueueGetMsgSize(queue);
