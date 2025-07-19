@@ -19,6 +19,8 @@
 /* Includes ------------------------------------------------------------------*/
 
 #include "cpp_app.hpp"		// App::init(), App::run()
+#include "queues.hpp"		// EncoderCommand, encoderQueue
+#include <cstdio>			// prinft()
 
 #ifdef __cplusplus
 extern "C" {
@@ -79,11 +81,15 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 	if (now - last_interrupt_time < 100) return; // debounce 100ms
 	last_interrupt_time = now;
 
+	// BLUE LED for debug purposes
 	HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_15);
 
-//    if (GPIO_Pin == GPIO_PIN_8 || GPIO_Pin == 256) {  // SW
-//    	uiManager.pressButton();
-//    }
+	EncoderCommand cmd;
+	cmd = ENCODER_CLICK;
+	osStatus_t status = osMessageQueuePut(encoderQueue, &cmd, 0, 0);
+	if (status != osOK) {
+		printf("encoderQueue FULL or error! Dropped cmd: %d (status: %d)\r\n", cmd, status);
+	}
 }
 
 /* USER CODE END 0 */

@@ -5,7 +5,7 @@
  *      Author: Marek
  */
 
-#include <cstdio>
+#include <cstdio>		// prinft()
 
 #include "cpp_app.hpp"
 #include "st7735.h"
