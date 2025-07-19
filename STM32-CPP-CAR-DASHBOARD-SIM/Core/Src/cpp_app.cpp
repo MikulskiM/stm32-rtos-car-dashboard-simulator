@@ -66,22 +66,22 @@ void App::initTasks() {
 
 	const osThreadAttr_t displayTask_attributes = {
 	  .name = "displayTask",
-	  .stack_size = STACK_SIZE,
+	  .stack_size = GENERAL_STACK_SIZE,
 	  .priority = (osPriority_t) osPriorityNormal,
 	};
 	const osThreadAttr_t managerTask_attributes = {
 	  .name = "managerTask",
-	  .stack_size = STACK_SIZE,
+	  .stack_size = GENERAL_STACK_SIZE,
 	  .priority = (osPriority_t) osPriorityNormal,
 	};
 	const osThreadAttr_t loggerTask_attributes = {
 	  .name = "loggerTask",
-	  .stack_size = STACK_SIZE,
+	  .stack_size = GENERAL_STACK_SIZE,
 	  .priority = (osPriority_t) osPriorityNormal,
 	};
 	const osThreadAttr_t encoderTask_attributes = {
 	  .name = "encoderTask",
-	  .stack_size = STACK_SIZE,
+	  .stack_size = GENERAL_STACK_SIZE,
 	  .priority = (osPriority_t) osPriorityNormal,
 	};
 

@@ -8,6 +8,8 @@
 #define ENCODER_POS_THRESHOLD_LEFT_MIN	16350
 #define ENCODER_POS_THRESHOLD_LEFT_MAX	32766
 
+#define GENERAL_STACK_SIZE 512*4
+
 #ifdef __cplusplus
 extern "C" {
 #endif

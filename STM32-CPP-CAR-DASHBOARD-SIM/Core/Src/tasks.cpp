@@ -20,7 +20,7 @@ void StartDisplayTask(void *argument) {
 	printf("Display task started\r\n");
 
 	uint32_t value = 0;
-	char buf[16];
+	char buf[DISPLAY_BUF_LEN];
 
 	ST7735_FillScreen(ST7735_BLACK);
 
@@ -38,11 +38,7 @@ void StartLoggerTask(void *argument) {
 	printf("Logger task started\r\n");
 	LogEvent log;
 
-	uint32_t queueSize = osMessageQueueGetMsgSize(loggerQueue);
-	if (queueSize != sizeof(LogEvent)) {
-		printf("ERROR: loggerQueue message size mismatch: queue=%lu struct=%lu\r\n",
-			   queueSize, sizeof(LogEvent));
-	}
+	checkQueueAndMsgSizeMatch("loggerQueue", loggerQueue, sizeof(LogEvent));
 
 	for (;;) {
 		if (osMessageQueueGet(loggerQueue, &log, NULL, osWaitForever) == osOK) {
@@ -55,7 +51,7 @@ void StartLoggerTask(void *argument) {
 				default:        levelStr = "???";   break;
 			}
 
-			char buffer[128];
+			char buffer[LOGGER_MSG_LEN];
 			snprintf(buffer, sizeof(buffer), "[%s] %s\r\n", levelStr, log.msg);
 			displayLog(buffer);
 		}
@@ -69,22 +65,14 @@ void sendLog(LogLevel level, const char* msg) {
 		return;
 	}
 
-	const uint32_t queueMsgSize = osMessageQueueGetMsgSize(loggerQueue);
-	if (queueMsgSize != sizeof(LogEvent)) {
-		printf("ERROR: loggerQueue size mismatch! Queue size: %lu, Struct size: %lu\r\n",
-			   queueMsgSize, sizeof(LogEvent));
-		return;
-	}
+	checkQueueAndMsgSizeMatch("loggerQueue", loggerQueue, sizeof(LogEvent));
 
 	LogEvent log;
 	log.level = level;
 	strncpy(log.msg, msg, sizeof(log.msg) - 1);
 	log.msg[sizeof(log.msg) - 1] = '\0';  // Null-terminate
 
-	osStatus_t status = osMessageQueuePut(loggerQueue, &log, 0, 100);
-	if (status != osOK) {
-		printf("LoggerQueue FULL or error! Dropped log: %s (status: %d)\r\n", log.msg, status);
-	}
+	SAFE_QUEUE_PUT(loggerQueue, log, "loggerQueue", MSG_PRIORITY_0, TIMEOUT_100, "%s");
 }
 
 void StartEncoderTask(void *argument) {
@@ -105,10 +93,7 @@ void StartEncoderTask(void *argument) {
 		}
 
 		if (rotated) {
-			osStatus_t status = osMessageQueuePut(encoderQueue, &cmd, 0, 100);
-			if (status != osOK) {
-				printf("encoderQueue FULL or error! Dropped cmd: %d (status: %d)\r\n", cmd, status);
-			}
+    		SAFE_QUEUE_PUT(encoderQueue, cmd, "encoderQueue", MSG_PRIORITY_0, TIMEOUT_100, "%d");
 
 			__HAL_TIM_SET_COUNTER(&htim1, 0);
 		}
@@ -121,7 +106,7 @@ void StartManagerTask(void *argument) {
 	printf("Manager task started\r\n");
 	EncoderCommand cmd;
     uint32_t counter = 0;
-    char msg[64];
+    char msg[ENCODER_MSG_LEN];
 
     for (;;) {
 
@@ -139,10 +124,7 @@ void StartManagerTask(void *argument) {
 
     		sendLog(LOG_INFO, msg);
 
-			osStatus_t status = osMessageQueuePut(displayQueue, &counter, 0, 100);
-			if (status != osOK) {
-				printf("displayQueue FULL or error! Dropped log: %s (status: %d)\r\n", msg, status);
-			}
+    		SAFE_QUEUE_PUT(displayQueue, counter, "displayQueue", MSG_PRIORITY_0, TIMEOUT_100, "%s");
 		}
 
 		osDelay(10);

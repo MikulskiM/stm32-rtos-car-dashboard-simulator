@@ -10,8 +10,6 @@
 
 #include "cmsis_os.h"
 
-#define STACK_SIZE 512*4
-
 class App {
 public:
 	void init();

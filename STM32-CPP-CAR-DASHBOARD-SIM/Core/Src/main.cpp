@@ -78,18 +78,14 @@ static uint32_t last_interrupt_time = 0;
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 
 	uint32_t now = HAL_GetTick();
-	if (now - last_interrupt_time < 100) return; // debounce 100ms
+	if (now - last_interrupt_time < DEBOUNCE_TIME) return; // debounce 100ms
 	last_interrupt_time = now;
 
 	// BLUE LED for debug purposes
 	HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_15);
 
-	EncoderCommand cmd;
-	cmd = ENCODER_CLICK;
-	osStatus_t status = osMessageQueuePut(encoderQueue, &cmd, 0, 0);
-	if (status != osOK) {
-		printf("encoderQueue FULL or error! Dropped cmd: %d (status: %d)\r\n", cmd, status);
-	}
+	EncoderCommand cmd = ENCODER_CLICK;
+	SAFE_QUEUE_PUT(encoderQueue, cmd, "encoderQueue", MSG_PRIORITY_0, TIMEOUT_0, "%d");
 }
 
 /* USER CODE END 0 */

@@ -31,7 +31,7 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#define DEBOUNCE_TIME	100
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/

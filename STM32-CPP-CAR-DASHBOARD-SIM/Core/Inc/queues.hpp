@@ -13,6 +13,26 @@
 #define EIGHT_MESSAGES		8
 #define SIXTEEN_MESSAGES	16
 
+#define TIMEOUT_0			0
+#define TIMEOUT_100			100
+
+#define MSG_PRIORITY_0		0
+
+#define LOGGER_MSG_LEN		128
+#define ENCODER_MSG_LEN		64
+#define DISPLAY_BUF_LEN		16
+
+#define SAFE_QUEUE_PUT(queue, value, queueName, priority, timeout, format)                \
+	do {                                                                                  \
+		osStatus_t status = osMessageQueuePut(queue, &(value), priority, timeout);        \
+		if (status != osOK) {                                                             \
+			printf("%s FULL or error! Dropped: " format " (status: %d)\r\n",              \
+			       queueName, value, status);                                             \
+		}                                                                                 \
+	} while (0)
+
+void checkQueueAndMsgSizeMatch(const char* name, osMessageQueueId_t queue, size_t expectedSize);
+
 //	--- ENCODER ---
 typedef enum {
 	ENCODER_LEFT,
