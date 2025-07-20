@@ -19,7 +19,9 @@
 /* Includes ------------------------------------------------------------------*/
 
 #include "cpp_app.hpp"		// App::init(), App::run()
-#include "ui_manager.hpp"	// uiManager.pressButton()
+#include "queues.hpp"		// EncoderCommand, encoderQueue
+#include "tasks.hpp"		// sendLog()
+#include <cstdio>			// prinft()
 
 #ifdef __cplusplus
 extern "C" {
@@ -77,16 +79,13 @@ static uint32_t last_interrupt_time = 0;
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 
 	uint32_t now = HAL_GetTick();
-	if (now - last_interrupt_time < 100) return; // debounce 100ms
+	if (now - last_interrupt_time < DEBOUNCE_TIME) return; // debounce 100ms
 	last_interrupt_time = now;
 
-	HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_15);
-
-    if (GPIO_Pin == GPIO_PIN_8 || GPIO_Pin == 256) {  // SW
-    	uiManager.pressButton();
-    }
+	EncoderCommand cmd = ENCODER_CLICK;
+//	sendLog(LOG_INFO, "Encoder CLICKED");	CAUSED HARD FAULT // TODO: find a way later to log it
+	SAFE_QUEUE_PUT(encoderQueue, cmd, "encoderQueue", MSG_PRIORITY_0, TIMEOUT_0, "%d");
 }
-
 
 /* USER CODE END 0 */
 
@@ -123,12 +122,11 @@ int main(void)
   MX_TIM1_Init();
   MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
+
   cpp_app.init();
   cpp_app.run();
-  /* USER CODE END 2 */
 
-  /* Init scheduler */
-  osKernelInitialize();
+  /* USER CODE END 2 */
 
   /* USER CODE BEGIN RTOS_MUTEX */
   /* add mutexes, ... */
@@ -155,9 +153,6 @@ int main(void)
   /* USER CODE BEGIN RTOS_EVENTS */
   /* add events, ... */
   /* USER CODE END RTOS_EVENTS */
-
-  /* Start scheduler */
-  osKernelStart();
 
   /* We should never get here as control is now taken by the scheduler */
 

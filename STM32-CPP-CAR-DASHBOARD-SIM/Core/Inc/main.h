@@ -28,11 +28,10 @@ extern "C" {
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f4xx_hal.h"
-#include "cmsis_os.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#define DEBOUNCE_TIME	100
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
