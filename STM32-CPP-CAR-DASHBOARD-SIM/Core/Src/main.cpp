@@ -20,6 +20,7 @@
 
 #include "cpp_app.hpp"		// App::init(), App::run()
 #include "queues.hpp"		// EncoderCommand, encoderQueue
+#include "tasks.hpp"		// sendLog()
 #include <cstdio>			// prinft()
 
 #ifdef __cplusplus
@@ -81,10 +82,8 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 	if (now - last_interrupt_time < DEBOUNCE_TIME) return; // debounce 100ms
 	last_interrupt_time = now;
 
-	// BLUE LED for debug purposes
-	HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_15);
-
 	EncoderCommand cmd = ENCODER_CLICK;
+//	sendLog(LOG_INFO, "Encoder CLICKED");	CAUSED HARD FAULT // TODO: find a way later to log it
 	SAFE_QUEUE_PUT(encoderQueue, cmd, "encoderQueue", MSG_PRIORITY_0, TIMEOUT_0, "%d");
 }
 

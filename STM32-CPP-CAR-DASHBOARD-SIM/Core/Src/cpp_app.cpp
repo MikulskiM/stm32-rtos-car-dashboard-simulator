@@ -13,6 +13,7 @@
 #include "lsm303dlhc_simple.h"
 #include "tasks.hpp"
 #include "queues.hpp"
+#include "ui_display.hpp"
 
 extern "C" {
     #include "main.h"
@@ -56,10 +57,6 @@ void App::initI2CSensors() {
 			printf("Device found at 0x%02X\r\n", addr);
 		}
 	}
-
-	LSM303DLHC_accel_raw test;
-	LSM303_ReadAccel(&hi2c1, &test);
-	printf("Accel INIT TEST: X=%d Y=%d Z=%d\r\n", test.x, test.y, test.z);
 }
 
 void App::initTasks() {
@@ -123,7 +120,7 @@ void App::initQueues() {
 		.name = "accelQueue"
 	};
 
-	displayQueue = osMessageQueueNew(SIXTEEN_MESSAGES, sizeof(uint32_t), &displayQueue_attributes);
+	displayQueue = osMessageQueueNew(SIXTEEN_MESSAGES, sizeof(DisplayState), &displayQueue_attributes);
 	loggerQueue = osMessageQueueNew(SIXTEEN_MESSAGES, sizeof(LogEvent), &loggerQueue_attributes);
 	encoderQueue = osMessageQueueNew(EIGHT_MESSAGES, sizeof(EncoderCommand), &loggerQueue_attributes);
 	accelQueue = osMessageQueueNew(EIGHT_MESSAGES, sizeof(LSM303DLHC_accel_raw), &accelQueue_attributes);
