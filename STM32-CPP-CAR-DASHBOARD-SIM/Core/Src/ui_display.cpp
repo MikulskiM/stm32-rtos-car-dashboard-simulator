@@ -18,8 +18,6 @@ static const uint16_t backgroundColors[] = {
     ST7735_WHITE
 };
 
-const size_t BACKGROUND_COLOR_COUNT = sizeof(backgroundColors) / sizeof(backgroundColors[0]);
-
 void UIDisplay::init() {
     ST7735_FillScreen(ST7735_BLACK);
 }
@@ -69,7 +67,7 @@ void UIDisplay::renderActiveMode(const DisplayState& state, uint16_t currentBack
 void UIDisplay::render(const DisplayState& state) {
     static const char* screenTitles[] = { "ACCEL", "LED", "SETTINGS" };
 
-    uint16_t currentBackgroundColor = backgroundColors[state.backgroundColor % BACKGROUND_COLOR_COUNT];
+    uint16_t currentBackgroundColor = backgroundColors[state.backgroundColor % backgroundColorCount()];
     ST7735_FillScreen(currentBackgroundColor);
 
     if (state.mode == MODE_MENU) {
@@ -77,4 +75,24 @@ void UIDisplay::render(const DisplayState& state) {
 	} else {
 		renderActiveMode(state, currentBackgroundColor);
 	}
+}
+
+size_t backgroundColorCount() {
+	return sizeof(backgroundColors) / sizeof(backgroundColors[0]);
+}
+
+DisplayScreen nextScreen(const DisplayState& state) {
+	return (DisplayScreen)((state.currentScreen + 1) % (SCREEN_COUNT));
+}
+
+DisplayScreen prevScreen(const DisplayState& state) {
+	return (DisplayScreen)((state.currentScreen + SCREEN_COUNT - 1) % (SCREEN_COUNT));
+}
+
+uint16_t nextBackgroundColor(const DisplayState& state) {
+	return (state.backgroundColor + 1) % backgroundColorCount();
+}
+
+uint16_t prevBackgroundColor(const DisplayState& state) {
+	return (state.backgroundColor + 4) % backgroundColorCount();
 }

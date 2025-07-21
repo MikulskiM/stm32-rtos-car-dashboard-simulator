@@ -55,4 +55,10 @@ private:
     void renderActiveMode(const DisplayState& state, uint16_t currentBackgroundColor);
 };
 
+DisplayScreen nextScreen(const DisplayState& state);
+DisplayScreen prevScreen(const DisplayState& state);
+uint16_t nextBackgroundColor(const DisplayState& state);
+uint16_t prevBackgroundColor(const DisplayState& state);
+size_t backgroundColorCount();
+
 #endif // UI_DISPLAY_HPP

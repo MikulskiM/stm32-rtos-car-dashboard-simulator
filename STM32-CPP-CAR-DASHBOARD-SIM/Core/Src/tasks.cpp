@@ -1,6 +1,5 @@
 #include "tasks.hpp"
 #include "st7735.h"
-#include "ui_display.hpp"
 
 #include <cstring>	// strcpy()
 #include <cstdio>	// printf()
@@ -58,22 +57,6 @@ void StartLoggerTask(void *argument) {
 	}
 }
 
-void sendLog(LogLevel level, const char* msg) {
-	if (!loggerQueue) {
-		printf("loggerQueue not initialized yet!");
-		return;
-	}
-
-	checkQueueAndMsgSizeMatch("loggerQueue", loggerQueue, sizeof(LogEvent));
-
-	LogEvent log;
-	log.level = level;
-	strncpy(log.msg, msg, sizeof(log.msg) - 1);
-	log.msg[sizeof(log.msg) - 1] = '\0';  // Null-terminate
-
-	SAFE_QUEUE_PUT(loggerQueue, log, "loggerQueue", MSG_PRIORITY_0, TIMEOUT_100, "%s");
-}
-
 void StartEncoderTask(void *argument) {
 	printf("Encoder task started\r\n");
 
@@ -103,6 +86,43 @@ void StartEncoderTask(void *argument) {
 	}
 }
 
+
+void handleEncoderCommand(EncoderCommand cmd, DisplayState& state) {
+	switch (cmd) {
+		case ENCODER_RIGHT:
+			if (state.mode == MODE_MENU) {
+				state.currentScreen = nextScreen(state);
+			} else {
+				if (state.currentScreen == SCREEN_LED) {
+					toggleLED(state);
+				} else if (state.currentScreen == SCREEN_SETTINGS) {
+					state.backgroundColor = nextBackgroundColor(state);
+				}
+			}
+			break;
+
+		case ENCODER_LEFT:
+			if (state.mode == MODE_MENU) {
+				state.currentScreen = prevScreen(state);
+			} else {
+				if (state.currentScreen == SCREEN_LED) {
+					toggleLED(state);
+				} else if (state.currentScreen == SCREEN_SETTINGS) {
+					state.backgroundColor = prevBackgroundColor(state);
+				}
+			}
+			break;
+
+		case ENCODER_CLICK:
+			if (state.mode == MODE_MENU) {
+				state.mode = MODE_ACTIVE;
+			} else {
+				state.mode = MODE_MENU;
+			}
+			break;
+	}
+}
+
 void StartManagerTask(void *argument) {
 	printf("Manager task started\r\n");
 
@@ -111,56 +131,11 @@ void StartManagerTask(void *argument) {
 	LSM303DLHC_accel_raw accelSnapshot;
 	uint32_t lastAccelUpdate = 0;
 	const uint32_t updateIntervalMs = 500;
-    char msg[LOGGER_MSG_LEN];
 
     for (;;) {
 
 		if (osMessageQueueGet(encoderQueue, &cmd, nullptr, 0) == osOK) {
-			switch (cmd) {
-				case ENCODER_RIGHT:
-					if (state.mode == MODE_MENU) {
-						state.currentScreen = static_cast<DisplayScreen>((static_cast<int>(state.currentScreen) + 1) % static_cast<int>(SCREEN_COUNT));
-					} else {
-						if (state.currentScreen == SCREEN_LED) {
-							state.ledOn = !state.ledOn;
-							if (state.ledOn) {
-								HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_SET);
-							} else {
-								HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_RESET);
-							}
-						} else if (state.currentScreen == SCREEN_SETTINGS) {
-							state.backgroundColor = (state.backgroundColor + 1) % 5;  // hardcoded 5 colors TODO: dynamic later
-						}
-					}
-					break;
-
-				case ENCODER_LEFT:
-					if (state.mode == MODE_MENU) {
-						int index = static_cast<int>(state.currentScreen);
-						index = (index - 1 + static_cast<int>(SCREEN_COUNT)) % static_cast<int>(SCREEN_COUNT);
-						state.currentScreen = static_cast<DisplayScreen>(index);
-					} else {
-						if (state.currentScreen == SCREEN_LED) {
-							state.ledOn = !state.ledOn;
-							if (state.ledOn) {
-								HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_SET);
-							} else {
-								HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_RESET);
-							}
-						} else if (state.currentScreen == SCREEN_SETTINGS) {
-							state.backgroundColor = (state.backgroundColor + 4) % 5;  // left: -1 + wrap TODO: dynamic later
-						}
-					}
-					break;
-
-				case ENCODER_CLICK:
-					if (state.mode == MODE_MENU) {
-						state.mode = MODE_ACTIVE;
-					} else {
-						state.mode = MODE_MENU;
-					}
-					break;
-			}
+			handleEncoderCommand(cmd, state);
 		}
 
 		if (osMessageQueueGet(accelQueue, &accelSnapshot, nullptr, 0) == osOK) {
@@ -209,3 +184,27 @@ void StartAccelTask(void *argument) {
 	}
 }
 
+void sendLog(LogLevel level, const char* msg) {
+	if (!loggerQueue) {
+		printf("loggerQueue not initialized yet!");
+		return;
+	}
+
+	checkQueueAndMsgSizeMatch("loggerQueue", loggerQueue, sizeof(LogEvent));
+
+	LogEvent log;
+	log.level = level;
+	strncpy(log.msg, msg, sizeof(log.msg) - 1);
+	log.msg[sizeof(log.msg) - 1] = '\0';  // Null-terminate
+
+	SAFE_QUEUE_PUT(loggerQueue, log, "loggerQueue", MSG_PRIORITY_0, TIMEOUT_100, "%s");
+}
+
+void toggleLED(DisplayState& state) {
+	state.ledOn = !state.ledOn;
+	if (state.ledOn) {
+		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_SET);
+	} else {
+		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_RESET);
+	}
+}

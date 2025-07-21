@@ -2,6 +2,7 @@
 #define TASKS_HPP_
 
 #include "queues.hpp"
+#include "ui_display.hpp"
 
 #define ENCODER_POS_THRESHOLD_RIGHT_MIN	2
 #define ENCODER_POS_THRESHOLD_RIGHT_MAX	16349
@@ -24,6 +25,7 @@ void StartEncoderTask(void *argument);
 void StartAccelTask(void *argument);
 
 void sendLog(LogLevel level, const char* msg);
+void toggleLED(DisplayState& state);
 
 #ifdef __cplusplus
 }
