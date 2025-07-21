@@ -49,6 +49,10 @@ class UIDisplay {
 public:
     void init();
     void render(const DisplayState& state);
+
+private:
+    void renderMenuMode(const DisplayState& state, const char** screenTitles, uint16_t currentBackgroundColor);
+    void renderActiveMode(const DisplayState& state, uint16_t currentBackgroundColor);
 };
 
 #endif // UI_DISPLAY_HPP

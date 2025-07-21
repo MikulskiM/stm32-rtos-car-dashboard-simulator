@@ -24,44 +24,57 @@ void UIDisplay::init() {
     ST7735_FillScreen(ST7735_BLACK);
 }
 
+void UIDisplay::renderMenuMode(const DisplayState& state, const char** screenTitles, uint16_t currentBackgroundColor) {
+    char buf[DISPLAY_TEXT_BUF_LEN];
+
+    snprintf(buf, sizeof(buf), "< %s >", screenTitles[(int)state.currentScreen]);
+    ST7735_WriteString(UI_TEXT_X, UI_TEXT_Y_HEADER, buf, Font_11x18, ST7735_WHITE, currentBackgroundColor);
+}
+
+void UIDisplay::renderActiveMode(const DisplayState& state, uint16_t currentBackgroundColor) {
+    char buf[DISPLAY_TEXT_BUF_LEN];
+
+	switch (state.currentScreen) {
+		case SCREEN_ACCEL:
+			snprintf(buf, sizeof(buf), "X=%d", state.accelX);
+			ST7735_WriteString(UI_TEXT_X, UI_TEXT_Y_HEADER, buf, Font_11x18, ST7735_WHITE, currentBackgroundColor);
+
+			snprintf(buf, sizeof(buf), "Y=%d", state.accelY);
+			ST7735_WriteString(UI_TEXT_X, UI_TEXT_Y_LINE1, buf, Font_11x18, ST7735_WHITE, currentBackgroundColor);
+
+			snprintf(buf, sizeof(buf), "Z=%d", state.accelZ);
+			ST7735_WriteString(UI_TEXT_X, UI_TEXT_Y_LINE3, buf, Font_11x18, ST7735_WHITE, currentBackgroundColor);
+			break;
+
+		case SCREEN_LED:
+			if (state.ledOn) {
+				snprintf(buf, sizeof(buf), "LED: ON");
+			} else {
+				snprintf(buf, sizeof(buf), "LED: OFF");
+			}
+			ST7735_WriteString(UI_TEXT_X, UI_TEXT_Y_HEADER, buf, Font_11x18, ST7735_WHITE, currentBackgroundColor);
+			break;
+
+		case SCREEN_SETTINGS:
+			snprintf(buf, sizeof(buf), "BG Color #%d", state.backgroundColor);
+			ST7735_WriteString(UI_TEXT_X, UI_TEXT_Y_HEADER, buf, Font_11x18, ST7735_WHITE, currentBackgroundColor);
+			break;
+
+		default:
+			ST7735_WriteString(UI_TEXT_X, UI_TEXT_Y_HEADER, "Unknown screen", Font_11x18, ST7735_WHITE, currentBackgroundColor);
+			break;
+	}
+}
+
 void UIDisplay::render(const DisplayState& state) {
     static const char* screenTitles[] = { "ACCEL", "LED", "SETTINGS" };
 
     uint16_t currentBackgroundColor = backgroundColors[state.backgroundColor % BACKGROUND_COLOR_COUNT];
     ST7735_FillScreen(currentBackgroundColor);
 
-    char buf[DISPLAY_TEXT_BUF_LEN];
-
     if (state.mode == MODE_MENU) {
-        snprintf(buf, sizeof(buf), "< %s >", screenTitles[(int)state.currentScreen]);
-        ST7735_WriteString(UI_TEXT_X, UI_TEXT_Y_HEADER, buf, Font_11x18, ST7735_WHITE, currentBackgroundColor);
-        return;
-    }
-
-    switch (state.currentScreen) {
-        case SCREEN_ACCEL:
-            snprintf(buf, sizeof(buf), "X=%d", state.accelX);
-            ST7735_WriteString(UI_TEXT_X, UI_TEXT_Y_HEADER, buf, Font_11x18, ST7735_WHITE, currentBackgroundColor);
-
-            snprintf(buf, sizeof(buf), "Y=%d", state.accelY);
-            ST7735_WriteString(UI_TEXT_X, UI_TEXT_Y_LINE1, buf, Font_11x18, ST7735_WHITE, currentBackgroundColor);
-
-            snprintf(buf, sizeof(buf), "Z=%d", state.accelZ);
-            ST7735_WriteString(UI_TEXT_X, UI_TEXT_Y_LINE3, buf, Font_11x18, ST7735_WHITE, currentBackgroundColor);
-            break;
-
-        case SCREEN_LED:
-            snprintf(buf, sizeof(buf), "LED: %s", state.ledOn ? "ON" : "OFF");
-            ST7735_WriteString(UI_TEXT_X, UI_TEXT_Y_HEADER, buf, Font_11x18, ST7735_WHITE, currentBackgroundColor);
-            break;
-
-        case SCREEN_SETTINGS:
-            snprintf(buf, sizeof(buf), "BG Color #%d", state.backgroundColor);
-            ST7735_WriteString(UI_TEXT_X, UI_TEXT_Y_HEADER, buf, Font_11x18, ST7735_WHITE, currentBackgroundColor);
-            break;
-
-        default:
-            ST7735_WriteString(UI_TEXT_X, UI_TEXT_Y_HEADER, "Unknown screen", Font_11x18, ST7735_WHITE, currentBackgroundColor);
-            break;
-    }
+		renderMenuMode(state, screenTitles, currentBackgroundColor);
+	} else {
+		renderActiveMode(state, currentBackgroundColor);
+	}
 }
