@@ -86,43 +86,6 @@ void StartEncoderTask(void *argument) {
 	}
 }
 
-
-void handleEncoderCommand(EncoderCommand cmd, DisplayState& state) {
-	switch (cmd) {
-		case ENCODER_RIGHT:
-			if (state.mode == MODE_MENU) {
-				state.currentScreen = nextScreen(state);
-			} else {
-				if (state.currentScreen == SCREEN_LED) {
-					toggleLED(state);
-				} else if (state.currentScreen == SCREEN_SETTINGS) {
-					state.backgroundColor = nextBackgroundColor(state);
-				}
-			}
-			break;
-
-		case ENCODER_LEFT:
-			if (state.mode == MODE_MENU) {
-				state.currentScreen = prevScreen(state);
-			} else {
-				if (state.currentScreen == SCREEN_LED) {
-					toggleLED(state);
-				} else if (state.currentScreen == SCREEN_SETTINGS) {
-					state.backgroundColor = prevBackgroundColor(state);
-				}
-			}
-			break;
-
-		case ENCODER_CLICK:
-			if (state.mode == MODE_MENU) {
-				state.mode = MODE_ACTIVE;
-			} else {
-				state.mode = MODE_MENU;
-			}
-			break;
-	}
-}
-
 void StartManagerTask(void *argument) {
 	printf("Manager task started\r\n");
 
@@ -130,12 +93,13 @@ void StartManagerTask(void *argument) {
 	DisplayState state;
 	LSM303DLHC_accel_raw accelSnapshot;
 	uint32_t lastAccelUpdate = 0;
-	const uint32_t updateIntervalMs = 500;
+	bool stateChanged = true;	// initial display of the menu
 
     for (;;) {
 
 		if (osMessageQueueGet(encoderQueue, &cmd, nullptr, 0) == osOK) {
 			handleEncoderCommand(cmd, state);
+			stateChanged = true;
 		}
 
 		if (osMessageQueueGet(accelQueue, &accelSnapshot, nullptr, 0) == osOK) {
@@ -145,9 +109,10 @@ void StartManagerTask(void *argument) {
 		}
 
 		uint32_t now = osKernelGetTickCount();
-		if ((now - lastAccelUpdate) > updateIntervalMs) {
+		if (stateChanged || timeForAccelUpdate(state, lastAccelUpdate, now)) {
 			osMessageQueuePut(displayQueue, &state, 0, 0);
 			lastAccelUpdate = now;
+			stateChanged = false;
 		}
 
 		osDelay(10);
@@ -206,5 +171,52 @@ void toggleLED(DisplayState& state) {
 		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_SET);
 	} else {
 		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_RESET);
+	}
+}
+
+void handleEncoderCommand(EncoderCommand cmd, DisplayState& state) {
+	switch (cmd) {
+		case ENCODER_RIGHT:
+			if (state.mode == MODE_MENU) {
+				state.currentScreen = nextScreen(state);
+			} else {
+				if (state.currentScreen == SCREEN_LED) {
+					toggleLED(state);
+				} else if (state.currentScreen == SCREEN_SETTINGS) {
+					state.backgroundColor = nextBackgroundColor(state);
+				}
+			}
+			break;
+
+		case ENCODER_LEFT:
+			if (state.mode == MODE_MENU) {
+				state.currentScreen = prevScreen(state);
+			} else {
+				if (state.currentScreen == SCREEN_LED) {
+					toggleLED(state);
+				} else if (state.currentScreen == SCREEN_SETTINGS) {
+					state.backgroundColor = prevBackgroundColor(state);
+				}
+			}
+			break;
+
+		case ENCODER_CLICK:
+			if (state.mode == MODE_MENU) {
+				state.mode = MODE_ACTIVE;
+			} else {
+				state.mode = MODE_MENU;
+			}
+			break;
+	}
+}
+
+bool timeForAccelUpdate(const DisplayState& state, uint32_t lastAccelUpdate, uint32_t now) {
+	const uint32_t updateIntervalMs = 500;
+	if (((now - lastAccelUpdate) > updateIntervalMs) &&
+			state.mode == MODE_ACTIVE &&
+			state.currentScreen == SCREEN_ACCEL) {
+		return true;
+	} else {
+		return false;
 	}
 }
