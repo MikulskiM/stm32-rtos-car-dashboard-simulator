@@ -26,6 +26,7 @@ typedef enum {
     SCREEN_ACCEL,
 	SCREEN_LED,
 	SCREEN_SETTINGS,
+	SCREEN_COMPASS,
 	SCREEN_COUNT
 } DisplayScreen;
 
@@ -42,7 +43,10 @@ struct DisplayState {
     int16_t accelX = 0;
     int16_t accelY = 0;
     int16_t accelZ = 0;
+
     uint8_t backgroundColor = 0;
+
+    int headingDegrees;	// degrees 0–359
 };
 
 class UIDisplay {

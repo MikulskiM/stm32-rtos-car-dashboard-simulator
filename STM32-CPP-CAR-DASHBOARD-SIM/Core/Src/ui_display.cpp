@@ -58,6 +58,11 @@ void UIDisplay::renderActiveMode(const DisplayState& state, uint16_t currentBack
 			ST7735_WriteString(UI_TEXT_X, UI_TEXT_Y_HEADER, buf, Font_11x18, ST7735_WHITE, currentBackgroundColor);
 			break;
 
+		case SCREEN_COMPASS:
+			snprintf(buf, sizeof(buf), "Heading:\t%d", 530);
+			ST7735_WriteString(UI_TEXT_X, UI_TEXT_Y_HEADER, buf, Font_11x18, ST7735_WHITE, currentBackgroundColor);
+			break;
+
 		default:
 			ST7735_WriteString(UI_TEXT_X, UI_TEXT_Y_HEADER, "Unknown screen", Font_11x18, ST7735_WHITE, currentBackgroundColor);
 			break;
@@ -65,7 +70,7 @@ void UIDisplay::renderActiveMode(const DisplayState& state, uint16_t currentBack
 }
 
 void UIDisplay::render(const DisplayState& state) {
-    static const char* screenTitles[] = { "ACCEL", "LED", "SETTINGS" };
+    static const char* screenTitles[] = { "ACCEL", "LED", "SETTINGS", "COMPASS" };
 
     uint16_t currentBackgroundColor = backgroundColors[state.backgroundColor % backgroundColorCount()];
     ST7735_FillScreen(currentBackgroundColor);

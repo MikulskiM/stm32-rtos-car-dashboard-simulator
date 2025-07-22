@@ -127,8 +127,12 @@ void StartAccelTask(void *argument) {
 	uint32_t tick = 0;
 	bool currentlyFalling = false;
 	uint32_t freeFallDuration = 0;
+	LSM303DLHC_mag_raw magData = {0};
 
 	for (;;) {
+		LSM303_ReadMag(&hi2c1, &magData);
+		int heading = LSM303_HeadingDegrees(&magData);
+
 		LSM303_ReadAccel(&hi2c1, &latestSample);
 
 		int32_t x = latestSample.x;
@@ -157,6 +161,7 @@ void StartAccelTask(void *argument) {
 			tick = 0;
 
 			printf("x = %d    y = %d    z = %d\n", x, y, z);
+			printf("heading:\t%d degrees\n", heading);
 
 			osStatus_t status = osMessageQueuePut(accelQueue, &latestSample, 0, 100);
 			if (status != osOK) {
