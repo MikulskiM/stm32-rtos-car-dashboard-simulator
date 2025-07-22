@@ -3,6 +3,7 @@
 
 #include <cstring>	// strcpy()
 #include <cstdio>	// printf()
+#include <cstdarg>	// va_list, va_start(), va_end()
 
 extern "C" {
 #include "main.h"
@@ -167,7 +168,7 @@ void StartAccelTask(void *argument) {
 	}
 }
 
-void sendLog(LogLevel level, const char* msg) {
+void sendLog(LogLevel level, const char* msg, ...) {
 	if (!loggerQueue) {
 		printf("loggerQueue not initialized yet!");
 		return;
@@ -177,8 +178,11 @@ void sendLog(LogLevel level, const char* msg) {
 
 	LogEvent log;
 	log.level = level;
-	strncpy(log.msg, msg, sizeof(log.msg) - 1);
-	log.msg[sizeof(log.msg) - 1] = '\0';  // Null-terminate
+
+	va_list args;
+	va_start(args, msg);
+	vsnprintf(log.msg, sizeof(log.msg), msg, args);
+	va_end(args);
 
 	SAFE_QUEUE_PUT(loggerQueue, log, "loggerQueue", MSG_PRIORITY_0, TIMEOUT_100, "%s");
 }

@@ -27,7 +27,7 @@ void StartManagerTask(void *argument);
 void StartEncoderTask(void *argument);
 void StartAccelTask(void *argument);
 
-void sendLog(LogLevel level, const char* msg);
+void sendLog(LogLevel level, const char* msg, ...);
 void toggleLED(DisplayState& state);
 void handleEncoderCommand(EncoderCommand cmd, DisplayState& state);
 bool timeForAccelUpdate(const DisplayState& state, uint32_t lastAccelUpdate, uint32_t now);
