@@ -124,6 +124,8 @@ void StartAccelTask(void *argument) {
 
 	LSM303DLHC_accel_raw latestSample = {0};
 	uint32_t tick = 0;
+	bool currentlyFalling = false;
+	uint32_t freeFallDuration = 0;
 
 	for (;;) {
 		LSM303_ReadAccel(&hi2c1, &latestSample);
@@ -132,12 +134,28 @@ void StartAccelTask(void *argument) {
 		int32_t y = latestSample.y;
 		int32_t z = latestSample.z;
 
-		// TODO: FREE FALL DETECTION
+		if (freeFallDetected(latestSample)) {
+			if (currentlyFalling) {
+				freeFallDuration += TIME_100_MS;
+				if (freeFallDuration % TIME_500_MS == 0) {
+					sendLog(LOG_WARN, "STILL FALLING...");
+				}
+			} else {
+				currentlyFalling = true;
+				sendLog(LOG_WARN, "FREE FALL!!!");
+			}
+		} else if (currentlyFalling) {
+		    currentlyFalling = false;
+		    sendLog(LOG_INFO, "FREE FALL ENDED (%dms)!!! We hope you're ok...", freeFallDuration);
+		    freeFallDuration = 0;
+		}
 
 		// every 500 ms send snapshot to the manager
 		tick += TIME_100_MS;
 		if (tick >= TIME_500_MS) {
 			tick = 0;
+
+			printf("x = %d    y = %d    z = %d\n", x, y, z);
 
 			osStatus_t status = osMessageQueuePut(accelQueue, &latestSample, 0, 100);
 			if (status != osOK) {
@@ -219,4 +237,9 @@ bool timeForAccelUpdate(const DisplayState& state, uint32_t lastAccelUpdate, uin
 	} else {
 		return false;
 	}
+}
+
+bool freeFallDetected(const LSM303DLHC_accel_raw& accel_data) {
+    int32_t squared = accel_data.x * accel_data.x + accel_data.y * accel_data.y + accel_data.z * accel_data.z;
+    return squared < (FREE_FALL_THRESHOLD * FREE_FALL_THRESHOLD);
 }

@@ -11,6 +11,8 @@ void LSM303_Init(I2C_HandleTypeDef *hi2c) {
     if (status != HAL_OK) {
         printf("LSM303 INIT FAILED!\r\n");
     }
+    uint8_t ctrl4 = 0x08; // HR (high resolution) = 1, FS = +-2g, full 16-bit data
+    HAL_I2C_Mem_Write(hi2c, LSM303_ACC_ADDRESS << 1, 0x23, 1, &ctrl4, 1, HAL_MAX_DELAY);
 }
 
 void LSM303_ReadAccel(I2C_HandleTypeDef *hi2c, LSM303DLHC_accel_raw *data) {
