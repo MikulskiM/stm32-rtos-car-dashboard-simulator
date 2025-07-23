@@ -10,6 +10,7 @@ extern "C" {
 #include "cmsis_os.h"
 #include "stm32f4xx_hal.h"
 #include "lsm303dlhc_simple.h"
+#include "sd_card.h"
 }
 
 inline void displayLog(const char* msg) {
@@ -53,6 +54,8 @@ void StartLoggerTask(void *argument) {
 			char buffer[LOGGER_MSG_LEN];
 			snprintf(buffer, sizeof(buffer), "[%s] %s\r\n", levelStr, log.msg);
 			displayLog(buffer);
+
+			SD_Log_Writef("[%s] %s\r\n", levelStr, log.msg);
 		}
 		osDelay(1);
 	}

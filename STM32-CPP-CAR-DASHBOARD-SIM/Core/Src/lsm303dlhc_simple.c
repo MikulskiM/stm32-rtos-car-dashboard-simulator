@@ -2,6 +2,7 @@
 #include "stm32f4xx_hal.h"
 
 #include <math.h>	// atan2f()
+#include <stdio.h>
 
 #define LSM303_ACC_ADDRESS		(0x32 >> 1)  // 7-bit address (accelerometer)
 #define LSM303_CTRL_REG1_A		0x20

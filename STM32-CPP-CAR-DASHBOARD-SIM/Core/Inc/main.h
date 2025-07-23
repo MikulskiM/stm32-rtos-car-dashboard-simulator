@@ -64,6 +64,8 @@ void Error_Handler(void);
 #define DC_OLED_GPIO_Port GPIOA
 #define CS_OLED_Pin GPIO_PIN_4
 #define CS_OLED_GPIO_Port GPIOA
+#define SD_SPI2_CS_Pin GPIO_PIN_12
+#define SD_SPI2_CS_GPIO_Port GPIOB
 #define BLUE_LED_OUT_Pin GPIO_PIN_15
 #define BLUE_LED_OUT_GPIO_Port GPIOD
 #define ENCODER_SW_EXTI_Pin GPIO_PIN_8

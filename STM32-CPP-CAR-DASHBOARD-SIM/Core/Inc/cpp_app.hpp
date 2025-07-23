@@ -18,6 +18,7 @@ public:
 private:
 	void initDisplay();
 	void initI2CSensors();
+	void initSDCard();
 	void initTasks();
 	void initQueues();
 	void initEncoder();

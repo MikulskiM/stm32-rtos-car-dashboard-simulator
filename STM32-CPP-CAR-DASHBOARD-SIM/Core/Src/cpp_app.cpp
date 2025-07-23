@@ -18,6 +18,7 @@
 extern "C" {
     #include "main.h"
     #include "stm32f4xx_hal.h"
+	#include "sd_card.h"
 }
 
 App cpp_app;
@@ -25,6 +26,7 @@ App cpp_app;
 void App::init() {
 	initDisplay();
 	initI2CSensors();
+	initSDCard();
 	initTasks();
 	initQueues();
 	initEncoder();
@@ -56,6 +58,16 @@ void App::initI2CSensors() {
 		if (HAL_I2C_IsDeviceReady(&hi2c1, addr << 1, 2, 10) == HAL_OK) {
 			printf("Device found at 0x%02X\r\n", addr);
 		}
+	}
+}
+
+void App::initSDCard() {
+	printf("initiating SD card...\n");
+
+	if (SD_Card_Init() == SD_OK) {
+		printf("SD card initialized OK!\n");
+	} else {
+		printf("SD card init FAILED!\n");
 	}
 }
 
