@@ -4,16 +4,17 @@ An embedded car dashboard simulator built on the STM32F411E-DISCO development bo
 
 ## 🚗 Features (Planned / In Progress)
 
-- UART debug output and error logging
+- SWV debug output and error logging
 - Modular project structure in C++
 - FreeRTOS-based task structure
 - Menu UI controlled via rotary encoder with button
 - OLED display output connected via SPI
-- "Car Status" screen: voltage, tilt (IMU), temperature
-- "Radio" screen: Simulated radio or music mode
-- "Settings" screen (brightness, logging rate, etc.)
-- LED lighting control menu (RGB strips or simulation)
-- Black box style data logger (RAM or SD card)
+- "ACCEL" screen: Display accelerator data and detect free-falling
+- "COMPASS" screen: Display the direction in which the device is heading
+- "RADIO" screen: Simulated radio
+- "SETTINGS" screen: Change display options
+- "LED" screen: LED control menu (RGB strips and on-board LED)
+- Black box style data logger (SD card)
 
 ## 🧠 Technologies Used
 
@@ -21,10 +22,11 @@ An embedded car dashboard simulator built on the STM32F411E-DISCO development bo
 - STM32CubeIDE + STM32CubeMX
 - STM32Cube HAL
 - C / C++
-- UART debugging
+- SWV debugging
 - FreeRTOS
-- SPI OLED (used 0.96' 80x160 ST7735)
-- Rotary encoder input
+- LSM303DLHC sensor
+- ST7735 SPI OLED (0.96' 80x160)
+- Rotary encoder with button
 
 ## 🔧 How to Build
 
@@ -35,10 +37,9 @@ An embedded car dashboard simulator built on the STM32F411E-DISCO development bo
 
 Alternatively, open `*.ioc` in STM32CubeMX to reconfigure peripherals.
 
-## 📸 Preview
+## 📸 CONNECTION
 
-// TODO: Add photos or video of the UI in action
+<img width="900" height="510" alt="diagram_stm32_projekt drawio" src="https://github.com/user-attachments/assets/0c47e43f-3942-4c48-aa71-02d4264de41b" />
+<img width="752" height="700" alt="image" src="https://github.com/user-attachments/assets/40eb4664-be18-44ba-b571-4b0996270776" />
 
----
 
-This project is for educational and prototyping purposes only and is not intended for direct use in automotive systems.
