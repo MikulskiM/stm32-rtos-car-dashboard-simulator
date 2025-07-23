@@ -22,6 +22,13 @@
 
 #define DISPLAY_TEXT_BUF_LEN  32
 
+#define HEADING_NORTH		0
+#define HEADING_EAST		90
+#define HEADING_SOUTH		180
+#define HEADING_WEST		270
+#define HEADING_NORTH_2		360
+#define HEADING_TOLERANCE	3
+
 typedef enum {
     SCREEN_ACCEL,
 	SCREEN_LED,
@@ -64,5 +71,6 @@ DisplayScreen prevScreen(const DisplayState& state);
 uint16_t nextBackgroundColor(const DisplayState& state);
 uint16_t prevBackgroundColor(const DisplayState& state);
 size_t backgroundColorCount();
+const char* directionFromDegrees(int headingDagrees);
 
 #endif // UI_DISPLAY_HPP

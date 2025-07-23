@@ -25,12 +25,12 @@ void StartDisplayTask(void *argument);
 void StartLoggerTask(void *argument);
 void StartManagerTask(void *argument);
 void StartEncoderTask(void *argument);
-void StartAccelTask(void *argument);
+void StartLSM303Task(void *argument);
 
 void sendLog(LogLevel level, const char* msg, ...);
 void toggleLED(DisplayState& state);
 void handleEncoderCommand(EncoderCommand cmd, DisplayState& state);
-bool timeForAccelUpdate(const DisplayState& state, uint32_t lastAccelUpdate, uint32_t now);
+bool timeForLSM303AccelUpdate(const DisplayState& state, uint32_t lastLSM303Update, uint32_t now);
 bool freeFallDetected(const LSM303DLHC_accel_raw& accel_data);
 
 #ifdef __cplusplus

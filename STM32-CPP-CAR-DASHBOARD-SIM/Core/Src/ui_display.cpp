@@ -34,13 +34,13 @@ void UIDisplay::renderActiveMode(const DisplayState& state, uint16_t currentBack
 
 	switch (state.currentScreen) {
 		case SCREEN_ACCEL:
-			snprintf(buf, sizeof(buf), "X=%d", state.accelX);
+			snprintf(buf, sizeof(buf), "X = %d", state.accelX);
 			ST7735_WriteString(UI_TEXT_X, UI_TEXT_Y_HEADER, buf, Font_11x18, ST7735_WHITE, currentBackgroundColor);
 
-			snprintf(buf, sizeof(buf), "Y=%d", state.accelY);
+			snprintf(buf, sizeof(buf), "Y = %d", state.accelY);
 			ST7735_WriteString(UI_TEXT_X, UI_TEXT_Y_LINE1, buf, Font_11x18, ST7735_WHITE, currentBackgroundColor);
 
-			snprintf(buf, sizeof(buf), "Z=%d", state.accelZ);
+			snprintf(buf, sizeof(buf), "Z = %d", state.accelZ);
 			ST7735_WriteString(UI_TEXT_X, UI_TEXT_Y_LINE3, buf, Font_11x18, ST7735_WHITE, currentBackgroundColor);
 			break;
 
@@ -59,8 +59,11 @@ void UIDisplay::renderActiveMode(const DisplayState& state, uint16_t currentBack
 			break;
 
 		case SCREEN_COMPASS:
-			snprintf(buf, sizeof(buf), "Heading:\t%d", 530);
-			ST7735_WriteString(UI_TEXT_X, UI_TEXT_Y_HEADER, buf, Font_11x18, ST7735_WHITE, currentBackgroundColor);
+			snprintf(buf, sizeof(buf), "Heading: %d degrees", state.headingDegrees);
+			ST7735_WriteString(UI_TEXT_X, UI_TEXT_Y_HEADER, buf, Font_7x10, ST7735_WHITE, currentBackgroundColor);
+
+			snprintf(buf, sizeof(buf), "%s", directionFromDegrees(state.headingDegrees));
+			ST7735_WriteString(UI_TEXT_X, UI_TEXT_Y_LINE1, buf, Font_11x18, ST7735_WHITE, currentBackgroundColor);
 			break;
 
 		default:
@@ -100,4 +103,18 @@ uint16_t nextBackgroundColor(const DisplayState& state) {
 
 uint16_t prevBackgroundColor(const DisplayState& state) {
 	return (state.backgroundColor + 4) % backgroundColorCount();
+}
+
+const char* directionFromDegrees(int headingDagrees) {
+	if (headingDagrees <= HEADING_TOLERANCE || headingDagrees >= HEADING_NORTH_2 - HEADING_TOLERANCE) {
+		return "NORTH";
+	} else if (headingDagrees >= HEADING_EAST - HEADING_TOLERANCE && headingDagrees <= HEADING_EAST + HEADING_TOLERANCE) {
+		return "EAST";
+	} else if (headingDagrees >= HEADING_SOUTH - HEADING_TOLERANCE && headingDagrees <= HEADING_SOUTH + HEADING_TOLERANCE) {
+		return "SOUTH";
+	} else if (headingDagrees >= HEADING_WEST - HEADING_TOLERANCE && headingDagrees <= HEADING_WEST + HEADING_TOLERANCE) {
+		return "WEST";
+	} else {
+		return "";
+	}
 }

@@ -92,8 +92,8 @@ void StartManagerTask(void *argument) {
 
 	EncoderCommand cmd;
 	DisplayState state;
-	LSM303DLHC_accel_raw accelSnapshot;
-	uint32_t lastAccelUpdate = 0;
+	LSM303DLHC_Snapshot snapshot;
+	uint32_t lastLSM303Update = 0;
 	bool stateChanged = true;	// initial display of the menu
 
     for (;;) {
@@ -103,16 +103,21 @@ void StartManagerTask(void *argument) {
 			stateChanged = true;
 		}
 
-		if (osMessageQueueGet(accelQueue, &accelSnapshot, nullptr, 0) == osOK) {
-			state.accelX = accelSnapshot.x;
-			state.accelY = accelSnapshot.y;
-			state.accelZ = accelSnapshot.z;
+		if (osMessageQueueGet(lsm303Queue, &snapshot, nullptr, 0) == osOK) {
+			if (state.currentScreen == SCREEN_ACCEL) {
+				state.accelX = snapshot.accel.x;
+				state.accelY = snapshot.accel.y;
+				state.accelZ = snapshot.accel.z;
+			}
+			else if (state.currentScreen == SCREEN_COMPASS) {
+				state.headingDegrees = snapshot.headingDegrees;
+			}
 		}
 
 		uint32_t now = osKernelGetTickCount();
-		if (stateChanged || timeForAccelUpdate(state, lastAccelUpdate, now)) {
+		if (stateChanged || timeForLSM303AccelUpdate(state, lastLSM303Update, now)) {
 			osMessageQueuePut(displayQueue, &state, 0, 0);
-			lastAccelUpdate = now;
+			lastLSM303Update = now;
 			stateChanged = false;
 		}
 
@@ -120,26 +125,19 @@ void StartManagerTask(void *argument) {
     }
 }
 
-void StartAccelTask(void *argument) {
-	printf("Accelerator task started\r\n");
+void StartLSM303Task(void *argument) {
+    printf("LSM303DLHC task started\r\n");
 
-	LSM303DLHC_accel_raw latestSample = {0};
-	uint32_t tick = 0;
 	bool currentlyFalling = false;
 	uint32_t freeFallDuration = 0;
-	LSM303DLHC_mag_raw magData = {0};
+    LSM303DLHC_Snapshot snapshot;
+    uint32_t tick = 0;
 
-	for (;;) {
-		LSM303_ReadMag(&hi2c1, &magData);
-		int heading = LSM303_HeadingDegrees(&magData);
+    for (;;) {
+		LSM303_ReadAccel(&hi2c1, &snapshot.accel);
+		snapshot.headingDegrees = LSM303_ReadHeadingDegrees(&hi2c1);
 
-		LSM303_ReadAccel(&hi2c1, &latestSample);
-
-		int32_t x = latestSample.x;
-		int32_t y = latestSample.y;
-		int32_t z = latestSample.z;
-
-		if (freeFallDetected(latestSample)) {
+		if (freeFallDetected(snapshot.accel)) {
 			if (currentlyFalling) {
 				freeFallDuration += TIME_100_MS;
 				if (freeFallDuration % TIME_500_MS == 0) {
@@ -150,27 +148,27 @@ void StartAccelTask(void *argument) {
 				sendLog(LOG_WARN, "FREE FALL!!!");
 			}
 		} else if (currentlyFalling) {
-		    currentlyFalling = false;
-		    sendLog(LOG_INFO, "FREE FALL ENDED (%dms)!!! We hope you're ok...", freeFallDuration);
-		    freeFallDuration = 0;
+			currentlyFalling = false;
+			sendLog(LOG_INFO, "FREE FALL ENDED (%dms)!!! We hope you're ok...", freeFallDuration);
+			freeFallDuration = 0;
 		}
 
-		// every 500 ms send snapshot to the manager
 		tick += TIME_100_MS;
 		if (tick >= TIME_500_MS) {
 			tick = 0;
 
-			printf("x = %d    y = %d    z = %d\n", x, y, z);
-			printf("heading:\t%d degrees\n", heading);
+			sendLog(LOG_INFO, "Accel: x= %-7d y= %-7d z= %-7d | Heading:%4d degrees %s",
+					 snapshot.accel.x, snapshot.accel.y, snapshot.accel.z,
+					 snapshot.headingDegrees, directionFromDegrees(snapshot.headingDegrees));
 
-			osStatus_t status = osMessageQueuePut(accelQueue, &latestSample, 0, 100);
+			osStatus_t status = osMessageQueuePut(lsm303Queue, &snapshot, 0, 100);
 			if (status != osOK) {
-				printf("accelQueue FULL or error! status = %d\r\n", status);
+				printf("lsm303Queue FULL or error! status = %d\r\n", status);
 			}
 		}
 
 		osDelay(TIME_100_MS);
-	}
+    }
 }
 
 void sendLog(LogLevel level, const char* msg, ...) {
@@ -237,11 +235,11 @@ void handleEncoderCommand(EncoderCommand cmd, DisplayState& state) {
 	}
 }
 
-bool timeForAccelUpdate(const DisplayState& state, uint32_t lastAccelUpdate, uint32_t now) {
+bool timeForLSM303AccelUpdate(const DisplayState& state, uint32_t lastLSM303Update, uint32_t now) {
 	const uint32_t updateIntervalMs = 500;
-	if (((now - lastAccelUpdate) > updateIntervalMs) &&
-			state.mode == MODE_ACTIVE &&
-			state.currentScreen == SCREEN_ACCEL) {
+	if (((now - lastLSM303Update) > updateIntervalMs) &&
+			((state.mode == MODE_ACTIVE && state.currentScreen == SCREEN_ACCEL) ||
+			 (state.mode == MODE_ACTIVE && state.currentScreen == SCREEN_COMPASS))) {
 		return true;
 	} else {
 		return false;

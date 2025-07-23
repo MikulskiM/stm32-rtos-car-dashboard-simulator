@@ -85,8 +85,8 @@ void App::initTasks() {
 	  .stack_size = GENERAL_STACK_SIZE,
 	  .priority = (osPriority_t) osPriorityNormal,
 	};
-	const osThreadAttr_t accelTask_attributes = {
-	  .name = "acceleratorTask",
+	const osThreadAttr_t LSM303Task_attributes = {
+	  .name = "LSM303Task",
 	  .stack_size = GENERAL_STACK_SIZE,
 	  .priority = (osPriority_t) osPriorityNormal,
 	};
@@ -95,7 +95,7 @@ void App::initTasks() {
 	osThreadNew(StartManagerTask, NULL, &managerTask_attributes);
 	osThreadNew(StartLoggerTask, NULL, &loggerTask_attributes);
 	osThreadNew(StartEncoderTask, NULL, &encoderTask_attributes);
-	osThreadNew(StartAccelTask, NULL, &accelTask_attributes);
+	osThreadNew(StartLSM303Task, NULL, &LSM303Task_attributes);
 }
 
 void App::initEncoder() {
@@ -116,14 +116,14 @@ void App::initQueues() {
 	const osMessageQueueAttr_t encoderQueue_attributes = {
 		.name = "encoderQueue"
 	};
-	const osMessageQueueAttr_t accelQueue_attributes = {
-		.name = "accelQueue"
+	const osMessageQueueAttr_t LSM303Queue_attributes = {
+		.name = "LSM303Queue"
 	};
 
 	displayQueue = osMessageQueueNew(SIXTEEN_MESSAGES, sizeof(DisplayState), &displayQueue_attributes);
 	loggerQueue = osMessageQueueNew(SIXTEEN_MESSAGES, sizeof(LogEvent), &loggerQueue_attributes);
-	encoderQueue = osMessageQueueNew(EIGHT_MESSAGES, sizeof(EncoderCommand), &loggerQueue_attributes);
-	accelQueue = osMessageQueueNew(EIGHT_MESSAGES, sizeof(LSM303DLHC_accel_raw), &accelQueue_attributes);
+	encoderQueue = osMessageQueueNew(EIGHT_MESSAGES, sizeof(EncoderCommand), &encoderQueue_attributes);
+	lsm303Queue = osMessageQueueNew(EIGHT_MESSAGES, sizeof(LSM303DLHC_Snapshot), &LSM303Queue_attributes);
 
 	if (loggerQueue == NULL) {
 		printf("ERROR: loggerQueue not initialized!\r\n");
@@ -134,7 +134,7 @@ void App::initQueues() {
 	if (encoderQueue == NULL) {
 		printf("ERROR: encoderQueue not initialized!\r\n");
 	}
-	if (accelQueue == NULL) {
-		printf("ERROR: accelQueue not initialized!\r\n");
+	if (lsm303Queue == NULL) {
+		printf("ERROR: LSM303Queue not initialized!\r\n");
 	}
 }

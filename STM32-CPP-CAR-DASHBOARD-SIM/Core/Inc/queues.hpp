@@ -53,12 +53,12 @@ typedef enum {
 
 struct LogEvent {
 	LogLevel level;
-	char msg[64];
+	char msg[LOGGER_MSG_LEN];
 };
 
 extern osMessageQueueId_t loggerQueue;
 
-//	--- ACCELERATOR ---
-extern osMessageQueueId_t accelQueue;
+//	--- LSM303DLHC ---
+extern osMessageQueueId_t lsm303Queue;
 
 #endif /* INC_QUEUES_HPP_ */

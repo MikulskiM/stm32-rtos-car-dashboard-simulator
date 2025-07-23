@@ -84,3 +84,9 @@ int LSM303_HeadingDegrees(const LSM303DLHC_mag_raw* mag) {
 
     return (int)(heading * (180.0f / (float)M_PI)); // degrees out
 }
+
+int LSM303_ReadHeadingDegrees(I2C_HandleTypeDef *hi2c) {
+	LSM303DLHC_mag_raw data;
+	LSM303_ReadMag(hi2c, &data);
+	return LSM303_HeadingDegrees(&data);
+}
