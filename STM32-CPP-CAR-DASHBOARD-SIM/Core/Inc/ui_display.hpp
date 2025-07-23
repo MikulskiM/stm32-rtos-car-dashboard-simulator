@@ -29,11 +29,18 @@
 #define HEADING_NORTH_2		360
 #define HEADING_TOLERANCE	3
 
+#define RADIO_FREQ_INIT_VAL	900
+#define RADIO_FREQ_DIVIDER	10.0
+#define RADIO_FREQ_STEP		1
+#define RADIO_FREQ_MIN		875
+#define RADIO_FREQ_MAX		1080
+
 typedef enum {
     SCREEN_ACCEL,
 	SCREEN_LED,
 	SCREEN_SETTINGS,
 	SCREEN_COMPASS,
+	SCREEN_RADIO,
 	SCREEN_COUNT
 } DisplayScreen;
 
@@ -54,6 +61,8 @@ struct DisplayState {
     uint8_t backgroundColor = 0;
 
     int headingDegrees;	// degrees 0–359
+
+    uint16_t radioFrequency = RADIO_FREQ_INIT_VAL;	// MHz * 10
 };
 
 class UIDisplay {

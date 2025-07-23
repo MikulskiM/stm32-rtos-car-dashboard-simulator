@@ -66,6 +66,11 @@ void UIDisplay::renderActiveMode(const DisplayState& state, uint16_t currentBack
 			ST7735_WriteString(UI_TEXT_X, UI_TEXT_Y_LINE1, buf, Font_11x18, ST7735_WHITE, currentBackgroundColor);
 			break;
 
+		case SCREEN_RADIO:
+			snprintf(buf, sizeof(buf), "< %.1f >", (float)(state.radioFrequency / RADIO_FREQ_DIVIDER));
+			ST7735_WriteString(UI_TEXT_X, UI_TEXT_Y_HEADER, buf, Font_11x18, ST7735_WHITE, currentBackgroundColor);
+			break;
+
 		default:
 			ST7735_WriteString(UI_TEXT_X, UI_TEXT_Y_HEADER, "Unknown screen", Font_11x18, ST7735_WHITE, currentBackgroundColor);
 			break;
@@ -73,7 +78,7 @@ void UIDisplay::renderActiveMode(const DisplayState& state, uint16_t currentBack
 }
 
 void UIDisplay::render(const DisplayState& state) {
-    static const char* screenTitles[] = { "ACCEL", "LED", "SETTINGS", "COMPASS" };
+    static const char* screenTitles[] = { "ACCEL", "LED", "SETTINGS", "COMPASS", "RADIO" };
 
     uint16_t currentBackgroundColor = backgroundColors[state.backgroundColor % backgroundColorCount()];
     ST7735_FillScreen(currentBackgroundColor);

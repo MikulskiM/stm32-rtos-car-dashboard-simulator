@@ -209,6 +209,10 @@ void handleEncoderCommand(EncoderCommand cmd, DisplayState& state) {
 					toggleLED(state);
 				} else if (state.currentScreen == SCREEN_SETTINGS) {
 					state.backgroundColor = nextBackgroundColor(state);
+				} else if (state.currentScreen == SCREEN_RADIO) {
+					if (state.radioFrequency < RADIO_FREQ_MAX) {
+						state.radioFrequency += RADIO_FREQ_STEP;
+					}
 				}
 			}
 			break;
@@ -221,6 +225,10 @@ void handleEncoderCommand(EncoderCommand cmd, DisplayState& state) {
 					toggleLED(state);
 				} else if (state.currentScreen == SCREEN_SETTINGS) {
 					state.backgroundColor = prevBackgroundColor(state);
+				} else if (state.currentScreen == SCREEN_RADIO) {
+					if (state.radioFrequency > RADIO_FREQ_MIN) {
+						state.radioFrequency -= RADIO_FREQ_STEP;
+					}
 				}
 			}
 			break;
